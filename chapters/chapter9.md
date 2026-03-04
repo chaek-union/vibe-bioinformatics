@@ -10,13 +10,13 @@
 
 ### 공통 레이아웃
 
-일반 페이지는 랜딩 페이지와 동일한 Header(Navbar)와 Footer를 공유하되, Hero Section은 생략하거나 축소된 형태로 사용한다.
+일반 페이지는 랜딩 페이지와 동일한 Header(Navbar)와 Footer를 공유하되, Hero Section의 높이를 크게 줄여 간결한 형태로 사용한다. 랜딩 페이지의 Hero가 화면 좌우 전체 너비에 큰 높이를 차지하는 것과 달리, 일반 페이지의 Hero는 페이지 제목 정도만 표시하는 얇은 배너 형태이다.
 
 ![레이아웃 비교](../assets/ch9-02-layout-comparison.png)
 
 | 영역 | 랜딩 페이지 | 일반 페이지 |
 |------|-------------|-------------|
-| **Header** | Navbar + 큰 Hero Section | Navbar만 (또는 축소된 페이지 타이틀) |
+| **Header** | Navbar + 큰 Hero Section | Navbar + 축소된 Hero (페이지 타이틀 배너) |
 | **Body** | 기능 소개, 특징 카드 등 | 실제 도구 인터페이스, 콘텐츠 |
 | **Footer** | 동일 | 동일 |
 
@@ -247,7 +247,7 @@ Claude Code에서는 디자인 목업 이미지를 참조하여 구현을 요청
 
 ## 9.7 정리
 
-- **일반 페이지는 랜딩 페이지와 동일한 Header/Footer를 공유하되, Hero Section을 생략**
+- **일반 페이지는 랜딩 페이지와 동일한 Header/Footer를 공유하되, Hero Section을 축소**
   - Breadcrumb + Heading으로 현재 위치와 페이지 제목을 표시
 - **도구 페이지에서 자주 사용되는 컴포넌트를 숙지**
   - 입력: Textarea, Input, Select, File Upload, Button
