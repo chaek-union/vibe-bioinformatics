@@ -112,79 +112,39 @@ Tailwind CSS는 SvelteKit 프로젝트 생성 시 옵션으로 함께 설치할 
 
 ## 7.3 Docker 환경 구성
 
-### compose.yml 작성
+### compose.yml과 Dockerfile 생성
 
-프로젝트 루트에 `compose.yml` 파일을 생성한다. 이 파일은 SvelteKit 개발 서버와 PostgreSQL 데이터베이스를 함께 관리한다. 3장에서 배운 Docker Compose의 실전 적용이다.
+3장에서 배운 Docker Compose를 실전에 적용한다. Claude Code에게 다음과 같이 요청한다:
 
-```yaml
-services:
-  app:
-    build: .
-    ports:
-      - "5173:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/bioinfo
-    depends_on:
-      - db
+> "SvelteKit 앱과 PostgreSQL 데이터베이스를 Docker Compose로 구성해줘. compose.yml과 compose.dev.yml을 만들어줘. compose.yml은 배포용이고, compose.dev.yml은 개발용으로 볼륨 마운트와 핫 리로드를 설정해줘. Dockerfile도 함께 만들어줘."
 
-  db:
-    image: postgres:16-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: bioinfo
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+이때 **compose.yml**(배포용)과 **compose.dev.yml**(개발용)을 분리하는 것이 좋다. 개발 환경에서는 코드 변경이 즉시 반영되어야 하지만, 배포 환경에서는 최적화된 빌드 결과만 실행하면 된다. 두 파일을 분리해 두면, 개발할 때는 `docker compose -f compose.dev.yml up`으로, 배포할 때는 `docker compose up`으로 실행할 수 있다.
 
-volumes:
-  pgdata:
-```
+Claude Code가 생성하는 파일의 주요 설정을 이해해 두면, 결과를 검토하고 수정 요청을 내리기 쉽다:
 
-각 설정의 의미를 살펴보면:
+| 설정 | 의미 |
+|------|------|
+| `volumes: - .:/app` | 로컬 코드를 컨테이너에 연결. 코드 수정 시 즉시 반영 |
+| `/app/node_modules` | 컨테이너 자체의 node_modules 사용. 호스트와 충돌 방지 |
+| `depends_on: - db` | db를 먼저 시작한 후 app 시작 |
+| `pgdata:/var/lib/postgresql/data` | 컨테이너 삭제해도 데이터베이스 보존 |
+| `DATABASE_URL` | 컨테이너 간 네트워크 주소. `db`는 서비스 이름 |
 
-- **`volumes: - .:/app`**: 현재 디렉토리(`.`)를 컨테이너 내부의 `/app`에 연결한다. 이렇게 하면 로컬에서 코드를 수정했을 때 컨테이너 내부에도 즉시 반영된다. 코드를 수정할 때마다 이미지를 다시 빌드할 필요가 없다.
-- **`/app/node_modules`**: node_modules 디렉토리는 컨테이너 자체의 것을 사용하도록 별도 볼륨으로 설정한다. 호스트의 node_modules와 컨테이너의 것이 충돌하는 것을 방지한다.
-- **`depends_on: - db`**: app 서비스가 db 서비스에 의존한다는 선언이다. Docker Compose는 db를 먼저 시작한 후 app을 시작한다.
-- **`pgdata:/var/lib/postgresql/data`**: 데이터베이스 파일을 Named Volume에 저장한다. 컨테이너를 삭제해도 데이터베이스 내용은 보존된다.
-- **`DATABASE_URL`**: app 컨테이너에서 db 컨테이너에 접속하기 위한 주소이다. `db`는 Docker Compose가 자동으로 부여하는 서비스 이름으로, 컨테이너 간 네트워크에서 호스트명으로 사용된다.
-
-### Dockerfile 작성
-
-프로젝트 루트에 `Dockerfile`을 생성한다:
-
-```dockerfile
-FROM node:20-alpine
-
-WORKDIR /app
-
-# pnpm 설치
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# 의존성 설치
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
-
-# 소스 코드 복사
-COPY . .
-
-# 개발 서버 실행
-CMD ["pnpm", "dev", "--host"]
-```
-
-3장에서 배운 레이어 캐싱 원리가 적용되어 있다. `package.json`과 `pnpm-lock.yaml`을 먼저 복사하고 `pnpm install`을 실행한 뒤, 나머지 소스 코드를 복사한다. 소스 코드만 변경된 경우 의존성 설치 단계는 캐시를 사용하므로 빌드가 빠르다.
-
-`--host` 플래그는 개발 서버를 모든 네트워크 인터페이스에서 접근 가능하게 한다. Docker 컨테이너 내부에서 실행되는 서버에 호스트(내 컴퓨터)에서 접속하려면 이 플래그가 필요하다.
+Dockerfile에서는 3장에서 배운 레이어 캐싱 원리가 적용된다. `package.json`을 먼저 복사하고 의존성을 설치한 뒤 소스 코드를 복사하면, 소스 코드만 변경되었을 때 의존성 설치 단계를 건너뛸 수 있다. `--host` 플래그는 Docker 컨테이너 내부 서버에 호스트에서 접속하기 위해 필요하다.
 
 ## 7.4 환경 변수 (.env)
 
 프로젝트에서 데이터베이스 접속 정보, API 키 등 민감한 설정값은 **환경 변수**로 관리한다. 코드에 비밀번호를 직접 쓰면 Git에 커밋될 위험이 있다. 환경 변수를 사용하면 코드와 설정을 분리할 수 있다.
 
-프로젝트 루트에 `.env` 파일을 생성한다:
+> **중요**: `.env` 파일은 **반드시 사용자가 직접 작성해야 한다**. `.env`에는 데이터베이스 비밀번호, API 키 등 민감한 정보가 포함되므로, **Claude Code가 이 파일을 읽거나 생성하게 해서는 안 된다**. 글로벌 `CLAUDE.md`(`~/.claude/CLAUDE.md`)에 다음과 같이 추가하여, AI 에이전트가 `.env` 파일에 접근하지 못하도록 설정하는 것을 권장한다:
+>
+> ```
+> # 보안 규칙
+> - .env 파일을 절대 읽거나 수정하지 말 것
+> - .env.example만 참조할 것
+> ```
+
+프로젝트 루트에 `.env` 파일을 직접 생성한다:
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bioinfo
@@ -200,12 +160,9 @@ SvelteKit에서 환경 변수는 두 가지로 나뉜다:
 
 `PUBLIC_` 접두사가 없는 환경 변수는 서버 코드(`+page.server.ts`, `+server.ts`)에서만 접근할 수 있다. 브라우저에서 실행되는 코드에서는 읽을 수 없으므로, 데이터베이스 비밀번호나 API 키가 사용자에게 노출되지 않는다. 이 구분은 보안상 중요하다.
 
-> **주의**: `.env` 파일은 `.gitignore`에 반드시 추가하여 Git에 커밋되지 않도록 한다. 대신 `.env.example` 파일을 만들어 어떤 환경 변수가 필요한지 안내한다. `.env.example`에는 실제 값 대신 `DATABASE_URL=postgresql://user:password@localhost:5432/dbname` 같은 템플릿을 넣는다.
+`.env` 파일은 `.gitignore`에 반드시 추가하여 Git에 커밋되지 않도록 한다. 대신 `.env.example` 파일을 만들어 어떤 환경 변수가 필요한지 안내한다. `.env.example`에는 실제 값 대신 템플릿을 넣는다. 이 파일은 Claude Code에게 생성을 요청해도 된다.
 
-```bash
-# .gitignore에 추가
-echo ".env" >> .gitignore
-```
+> "`.env.example` 파일을 만들어줘. DATABASE_URL과 PUBLIC_SITE_NAME이 필요해."
 
 ## 7.5 프로젝트 디렉토리 구조
 
@@ -337,11 +294,12 @@ Docker 없이도 개발 서버를 실행할 수 있지만, 이 경우 PostgreSQL
 - **프로젝트 초기화는 직접 수행하고, 이후 기능 추가는 AI에게 맡기기**
   - `pnpm create svelte@latest`로 뼈대 생성 후 AI와 협업
 - **Docker Compose로 개발 환경을 통합 관리**
-  - 웹 앱과 데이터베이스를 한 번에 실행
-  - 볼륨 마운트로 코드 변경을 실시간 반영
-- **환경 변수(.env)로 민감한 정보를 분리 관리**
-  - `PUBLIC_` 접두사로 공개/비공개 구분
-  - `.gitignore`에 반드시 추가
+  - compose.yml(배포용)과 compose.dev.yml(개발용)을 분리
+  - Dockerfile, compose.yml 생성은 Claude Code에게 요청
+- **환경 변수(.env)는 반드시 사용자가 직접 작성**
+  - Claude Code가 `.env`를 읽거나 생성하게 하지 않기
+  - 글로벌 CLAUDE.md에 `.env` 접근 금지 규칙 추가
+  - `PUBLIC_` 접두사로 공개/비공개 구분, `.gitignore`에 반드시 추가
 - **CLAUDE.md에 프로젝트 명세를 작성하여 AI 에이전트 활용도를 높이기**
   - 정보가 많을수록 AI가 정확한 코드를 생성
   - 프로젝트 발전에 따라 지속적으로 업데이트

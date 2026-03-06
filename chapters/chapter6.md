@@ -76,247 +76,89 @@ DAG의 "비순환(Acyclic)"은 의존 관계가 원형으로 돌지 않는다는
 
 ![Snakemake DAG 시각화 예시](../assets/ch6-01-snakemake-dag.png)
 
-## 6.4 Snakefile 작성
+### expand() 함수
 
-### 기본 구조
-
-Snakefile은 프로젝트 루트에 `Snakefile`이라는 이름으로 작성한다. `rule all`은 최종적으로 원하는 결과 파일을 지정하는 특수 rule이다. Snakemake는 이 rule의 input에 명시된 파일들을 생성하기 위해 필요한 모든 중간 단계를 자동으로 역추적하여 실행한다.
-
-```python
-# 샘플 목록 정의
-SAMPLES = ["sample_A", "sample_B", "sample_C"]
-
-# 최종 목표 지정
-rule all:
-    input:
-        expand("results/counts/{sample}.counts.txt", sample=SAMPLES)
-
-# 1단계: 품질 확인
-rule fastqc:
-    input:
-        "data/{sample}.fastq.gz"
-    output:
-        "results/fastqc/{sample}_fastqc.html"
-    shell:
-        "fastqc {input} -o results/fastqc/"
-
-# 2단계: 트리밍
-rule trim:
-    input:
-        "data/{sample}.fastq.gz"
-    output:
-        "results/trimmed/{sample}_trimmed.fastq.gz"
-    shell:
-        "trim_galore {input} -o results/trimmed/"
-
-# 3단계: 정렬
-rule align:
-    input:
-        fastq="results/trimmed/{sample}_trimmed.fastq.gz",
-        index="ref/genome_index"
-    output:
-        "results/aligned/{sample}.bam"
-    threads: 4
-    shell:
-        "STAR --runThreadN {threads} "
-        "--genomeDir {input.index} "
-        "--readFilesIn {input.fastq} "
-        "--outSAMtype BAM SortedByCoordinate "
-        "--outFileNamePrefix results/aligned/{wildcards.sample}"
-
-# 4단계: 발현량 정량
-rule count:
-    input:
-        bam="results/aligned/{sample}.bam",
-        gtf="ref/genes.gtf"
-    output:
-        "results/counts/{sample}.counts.txt"
-    shell:
-        "featureCounts -a {input.gtf} -o {output} {input.bam}"
-```
-
-`expand()` 함수는 와일드카드를 구체적인 값으로 확장한다. `expand("results/counts/{sample}.counts.txt", sample=SAMPLES)`는 `["results/counts/sample_A.counts.txt", "results/counts/sample_B.counts.txt", "results/counts/sample_C.counts.txt"]`로 펼쳐진다. `rule all`에서 이 세 파일을 요구하면, Snakemake는 각 파일을 만들기 위해 count → align → trim 순서로 역추적하여 전체 파이프라인을 실행한다.
-
-`threads: 4`는 해당 rule이 CPU 4개를 사용한다는 선언이다. Snakemake는 전체 가용 코어 수(`--cores`)를 고려하여 동시에 실행할 수 있는 rule 수를 자동으로 조절한다.
-
-### 실행
-
-```bash
-# 드라이런 (실제 실행 없이 계획 확인)
-snakemake -n
-
-# 실행 (4개 작업 병렬)
-snakemake --cores 4
-
-# DAG 시각화
-snakemake --dag | dot -Tpng > dag.png
-```
-
-드라이런(`-n`)은 실제로 명령을 실행하지 않고, 어떤 rule이 어떤 순서로 실행될지 보여준다. 복잡한 파이프라인을 실행하기 전에 반드시 드라이런으로 계획을 확인하는 습관을 들이는 것이 좋다.
-
-![snakemake -n 드라이런 결과](../assets/ch6-02-snakemake-dryrun.png)
-
-## 6.5 주요 기능
+`expand()` 함수는 와일드카드를 구체적인 값으로 확장하는 함수이다. 예를 들어 `expand("results/{sample}.txt", sample=["A", "B", "C"])`는 `["results/A.txt", "results/B.txt", "results/C.txt"]`로 펼쳐진다. 주로 `rule all`에서 최종 목표 파일 목록을 지정할 때 사용한다.
 
 ### Conda 환경 통합
 
 생명정보학 파이프라인에서는 서로 다른 도구가 서로 다른 의존성을 요구하는 경우가 많다. STAR는 C++ 라이브러리가 필요하고, DESeq2는 R과 Bioconductor가 필요하다. 이 두 환경을 하나의 Conda 환경에 넣으면 충돌이 발생할 수 있다.
 
-Snakemake는 각 rule에 독립적인 Conda 환경을 지정할 수 있다. `--use-conda` 플래그를 붙여 실행하면, Snakemake가 각 rule에 지정된 YAML 파일을 읽어 자동으로 Conda 환경을 생성하고 활성화한다.
-
-```python
-rule deseq2:
-    input:
-        counts=expand("results/counts/{sample}.counts.txt", sample=SAMPLES)
-    output:
-        "results/deseq2/results.csv"
-    conda:
-        "envs/deseq2.yaml"
-    script:
-        "scripts/deseq2.R"
-```
-
-```yaml
-# envs/deseq2.yaml
-name: deseq2
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - r-base=4.3
-  - bioconductor-deseq2
-```
-
-이 구조의 장점은 환경 정의가 코드와 함께 버전 관리된다는 점이다. 1년 후에 파이프라인을 다시 실행해도 동일한 버전의 R과 DESeq2가 설치된다.
+Snakemake는 각 rule에 독립적인 Conda 환경을 지정할 수 있다. `--use-conda` 플래그를 붙여 실행하면, Snakemake가 각 rule에 지정된 YAML 파일을 읽어 자동으로 Conda 환경을 생성하고 활성화한다. 환경 정의가 코드와 함께 버전 관리되므로, 1년 후에 파이프라인을 다시 실행해도 동일한 버전의 도구가 설치된다.
 
 ### Config 파일
 
 분석 파라미터를 Snakefile과 분리하여 관리할 수 있다. Snakefile은 "어떻게 분석할 것인가"를, config 파일은 "무엇을 분석할 것인가"를 담당한다. 새로운 프로젝트에서 같은 파이프라인을 사용하고 싶다면, Snakefile은 그대로 두고 config.yaml만 수정하면 된다.
 
-```yaml
-# config.yaml
-samples:
-  - sample_A
-  - sample_B
-  - sample_C
-
-reference:
-  genome: "ref/genome.fa"
-  gtf: "ref/genes.gtf"
-
-params:
-  threads: 4
-  min_quality: 20
-```
-
-```python
-# Snakefile에서 config 사용
-configfile: "config.yaml"
-
-SAMPLES = config["samples"]
-
-rule trim:
-    input:
-        "data/{sample}.fastq.gz"
-    output:
-        "results/trimmed/{sample}_trimmed.fastq.gz"
-    params:
-        quality=config["params"]["min_quality"]
-    shell:
-        "trim_galore -q {params.quality} {input} -o results/trimmed/"
-```
-
 ### 로그 파일
 
-각 rule의 실행 로그를 별도로 저장하면 에러 발생 시 원인을 파악하기 훨씬 쉽다. 50개 샘플을 처리하다가 sample_37에서 에러가 났다면, `logs/align/sample_37.log`만 확인하면 된다.
+각 rule에 `log` 지시자를 추가하면 실행 로그를 별도로 저장할 수 있다. 50개 샘플을 처리하다가 sample_37에서 에러가 났다면, `logs/align/sample_37.log`만 확인하면 된다. 에러 발생 시 원인 파악이 훨씬 쉬워진다.
 
-```python
-rule align:
-    input:
-        "results/trimmed/{sample}_trimmed.fastq.gz"
-    output:
-        "results/aligned/{sample}.bam"
-    log:
-        "logs/align/{sample}.log"
-    shell:
-        "STAR --readFilesIn {input} > {log} 2>&1"
-```
+## 6.4 Claude Code로 Snakefile 작성하기
 
-`2>&1`은 표준 에러(stderr)를 표준 출력(stdout)으로 리다이렉트하여 모든 출력을 로그 파일에 기록하겠다는 의미이다.
+Snakemake의 문법을 완벽하게 익히는 것보다, **분석 파이프라인의 흐름을 이해하고 AI에게 정확히 설명하는 것**이 더 중요하다. rule, wildcard, DAG, expand, Conda 환경 등 핵심 개념을 이해하고 있으면, Claude Code에게 정확한 지시를 내릴 수 있다.
 
-## 6.6 바이브 코딩으로 Snakefile 작성하기
+### RNA-seq 파이프라인 생성
 
-Snakemake의 문법을 완벽하게 익히는 것보다, **분석 파이프라인의 흐름을 이해하고 AI에게 정확히 설명하는 것**이 더 중요하다. Claude Code에게 Snakefile을 요청할 때, 핵심은 각 분석 단계의 순서와 도구의 역할을 아는 것이다.
+다음과 같이 요청한다:
 
-### AI에게 요청하는 예시
-
-> "RNA-seq 파이프라인을 Snakemake로 만들어줘. 입력은 data/ 폴더의 FASTQ 파일이고, FastQC → Trim Galore → STAR 정렬 → featureCounts 순서로 처리해줘. 샘플 목록은 config.yaml에서 읽어오게 하고, 각 단계마다 로그 파일을 남겨줘"
+> "RNA-seq 파이프라인을 Snakemake로 만들어줘. 입력은 data/ 폴더의 FASTQ 파일이고, FastQC → Trim Galore → STAR 정렬 → featureCounts 순서로 처리해줘. 샘플 목록은 config.yaml에서 읽어오게 하고, 각 단계마다 로그 파일을 남겨줘."
 
 이 요청을 하려면 다음을 알아야 한다:
+
 - **분석 단계의 순서**: 왜 트리밍 다음에 정렬을 하는지 (어댑터가 남아 있으면 정렬 정확도가 떨어진다)
 - **각 도구의 역할**: FastQC는 품질 확인, Trim Galore는 어댑터 제거, STAR는 게놈 정렬, featureCounts는 유전자별 발현량 계산
 - **입출력 파일 형식**: FASTQ(시퀀싱 원본) → trimmed FASTQ → BAM(정렬 결과) → counts(발현량 테이블)
 
 반면, `expand()` 함수의 정확한 문법이나 `threads` 지시자의 사용법은 몰라도 된다. AI가 올바른 Snakemake 문법으로 작성해 준다.
 
-### Snakefile 수정 요청 예시
+### Conda 환경 분리 요청
 
-> "align rule에서 STAR 대신 HISAT2를 사용하도록 바꿔줘"
+> "각 rule에 독립적인 Conda 환경을 설정해줘. STAR와 featureCounts는 같은 환경을 쓰고, DESeq2는 R 환경을 별도로 만들어줘. envs/ 폴더에 YAML 파일을 생성해줘."
 
-> "count rule 다음에 DESeq2로 차등 발현 분석하는 rule 추가해줘. R 스크립트는 별도 파일로 분리하고, Conda 환경도 만들어줘"
+### Config 파일 분리
 
-> "sample_D가 추가됐으니까 config.yaml에 반영해줘"
+> "하드코딩된 샘플 목록과 파라미터를 config.yaml로 분리해줘. 샘플 이름, 레퍼런스 게놈 경로, 트리밍 품질 기준값을 config에서 읽어오게 바꿔줘."
 
-### 디버깅 요청 예시
+### 파이프라인 확장
 
-> "snakemake 실행하면 align 단계에서 에러가 나. logs/align/sample_A.log 보고 원인 알려줘"
+> "count rule 다음에 DESeq2로 차등 발현 분석하는 rule을 추가해줘. R 스크립트는 별도 파일로 분리하고, Conda 환경도 만들어줘."
 
-> "드라이런 결과를 보여주고, DAG 그래프도 생성해줘"
+> "align rule에서 STAR 대신 HISAT2를 사용하도록 바꿔줘."
 
-에러 로그를 AI에게 보여주면서 "이 에러의 원인이 뭐야?"라고 물어보는 것만으로도 대부분의 문제를 해결할 수 있다. 단, 로그 파일을 저장하는 설정이 되어 있어야 하므로, 처음 Snakefile을 만들 때 반드시 log 지시자를 포함하도록 요청하는 것이 좋다.
+> "sample_D가 추가됐으니까 config.yaml에 반영해줘."
 
-## 6.7 단일세포 분석 파이프라인
+### 실행과 디버깅
+
+Snakemake를 실행할 때는 항상 드라이런(`-n`)으로 먼저 계획을 확인하는 것이 좋다. Claude Code에게 다음과 같이 요청할 수 있다:
+
+> "Snakemake 드라이런을 실행해서 결과를 보여줘."
+
+> "Snakemake를 4코어로 실행해줘."
+
+> "DAG 그래프를 생성해줘."
+
+에러가 발생하면 로그 파일을 함께 보여주면서 디버깅을 요청한다:
+
+> "snakemake 실행하면 align 단계에서 에러가 나. logs/align/sample_A.log 보고 원인 알려줘."
+
+로그 파일을 저장하는 설정이 되어 있어야 하므로, 처음 Snakefile을 만들 때 반드시 log 지시자를 포함하도록 요청하는 것이 좋다.
+
+![snakemake -n 드라이런 결과](../assets/ch6-02-snakemake-dryrun.png)
+
+## 6.5 단일세포 분석 파이프라인
 
 5장에서 배운 Scanpy 분석도 Snakemake로 자동화할 수 있다. 단일세포 분석은 QC → 정규화 → 클러스터링이라는 순서를 따르므로, 각 단계를 rule로 분리하면 된다.
 
-```python
-SAMPLES = ["pbmc_10k", "pbmc_5k"]
+Claude Code에게 다음과 같이 요청한다:
 
-rule all:
-    input:
-        expand("results/{sample}/umap.png", sample=SAMPLES)
+> "5장에서 작성한 Scanpy 분석 코드를 Snakemake 파이프라인으로 변환해줘. QC, 정규화, 클러스터링을 각각 별도 rule로 분리하고, 각 단계의 결과를 h5ad 파일로 저장해줘. 여러 샘플에 대해 동시에 실행할 수 있게 와일드카드를 사용해줘."
 
-rule qc:
-    input:
-        "data/{sample}.h5ad"
-    output:
-        "results/{sample}/qc_filtered.h5ad"
-    script:
-        "scripts/01_qc.py"
+Snakemake에서는 `shell` 대신 `script` 지시자를 사용하면 Python이나 R 스크립트를 직접 실행할 수 있다. 스크립트 내에서 `snakemake.input[0]`, `snakemake.output[0]`으로 입출력 파일 경로를 참조할 수 있어, 스크립트를 Snakemake와 자연스럽게 연동할 수 있다.
 
-rule normalize:
-    input:
-        "results/{sample}/qc_filtered.h5ad"
-    output:
-        "results/{sample}/normalized.h5ad"
-    script:
-        "scripts/02_normalize.py"
+주피터 노트북에서 프로토타이핑한 분석을 재현 가능한 파이프라인으로 전환할 때 특히 유용하다. AI에게 기존 노트북 코드를 전달하면서 "이걸 Snakemake로 변환해줘"라고 요청하면, rule 단위로 분리된 Snakefile과 스크립트 파일을 생성해 준다.
 
-rule cluster:
-    input:
-        "results/{sample}/normalized.h5ad"
-    output:
-        "results/{sample}/clustered.h5ad",
-        "results/{sample}/umap.png"
-    script:
-        "scripts/03_cluster.py"
-```
-
-여기서 `shell` 대신 `script`를 사용하면 Python이나 R 스크립트를 직접 실행할 수 있다. 스크립트 내에서 `snakemake.input[0]`, `snakemake.output[0]`으로 입출력 파일 경로를 참조할 수 있어, 스크립트를 Snakemake와 자연스럽게 연동할 수 있다.
-
-> **팁**: AI에게 "이 Scanpy 분석을 Snakemake 파이프라인으로 변환해줘"라고 요청하면, 기존 분석 코드를 자동으로 rule 단위로 분리하고 Snakefile을 생성해 준다. 주피터 노트북에서 프로토타이핑한 분석을 재현 가능한 파이프라인으로 전환할 때 유용하다.
-
-## 6.8 정리
+## 6.6 정리
 
 - **Snakemake**: 생명정보학 분석 파이프라인을 자동화하는 워크플로우 관리 도구
   - 재현성, 자동 의존성 관리, 병렬 실행, 부분 재실행 지원

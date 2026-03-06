@@ -12,7 +12,7 @@
 ## 파트 II. 파이썬으로 분석하기
 
 * [4장. Python 데이터 분석 기초](chapters/chapter4.md)
-* [5장. Scanpy를 이용한 단일세포 데이터 분석](chapters/chapter5.md)
+* [5장. 생명정보 데이터 분석 실전](chapters/chapter5.md)
 * [6장. Snakemake를 이용한 워크플로우 관리](chapters/chapter6.md)
 
 ## 파트 III. 생명정보 웹 툴 만들기

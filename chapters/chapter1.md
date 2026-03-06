@@ -171,6 +171,14 @@ Claude Code에게 설치를 요청한다:
 
 Claude가 `curl -LsSf https://astral.sh/uv/install.sh | sh` 명령을 실행하고, 셸 설정까지 자동으로 처리해 준다.
 
+uv 설치 후에는 **글로벌 CLAUDE.md**에 uv 사용 지침을 추가하는 것이 좋다. 글로벌 CLAUDE.md(`~/.claude/CLAUDE.md`)는 모든 프로젝트에서 Claude Code가 참조하는 설정 파일이다. 여기에 "패키지 설치에 uv를 사용할 것"이라고 명시해 두면, 어떤 프로젝트에서든 Claude Code가 pip 대신 uv를 사용한다.
+
+```text
+> 글로벌 CLAUDE.md에 다음 규칙을 추가해줘:
+> - Python 패키지 설치 시 pip 대신 uv를 사용할 것
+> - 가상 환경 생성 시 uv venv를 사용할 것
+```
+
 ### micromamba
 
 micromamba는 Conda의 경량화 버전으로, Conda와 동일한 패키지 저장소(conda-forge, bioconda)를 사용하지만 훨씬 빠르고 가볍다. 원래 Conda는 Anaconda 배포판에 포함된 패키지 매니저인데, 설치 용량이 크고 속도가 느리다는 단점이 있었다. micromamba는 C++로 작성되어 이런 문제를 해결했다.
