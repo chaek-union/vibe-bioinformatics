@@ -175,9 +175,9 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
 
 > @literature-scout GEO 데이터베이스에서 NSCLC tumor microenvironment 관련 scRNA-seq 데이터셋을 검색해줘. 10x Genomics 플랫폼을 사용하고, 환자 수가 10명 이상인 데이터셋을 찾아줘. 각 데이터셋의 샘플 수, 세포 수, 논문 정보를 표로 정리해줘.
 
-Literature Scout이 후보 데이터셋을 정리하면, 연구자가 검토하여 하나를 선택한다. 여기서는 GSE1234567(가상)을 선택했다고 가정한다.
+Literature Scout이 후보 데이터셋을 정리하면, 연구자가 검토하여 하나를 선택한다. 여기서는 GSE154826을 선택했다고 가정한다. 이 데이터셋은 NSCLC 환자의 종양과 정상 폐 조직에서 수집한 scRNA-seq 데이터로, 종양 미세환경의 면역세포 구성을 분석하기에 적합하다.
 
-> data/ 디렉토리에 GEO에서 GSE1234567 데이터를 다운로드해줘. 10x Genomics의 filtered_feature_bc_matrix 형식 파일을 받아줘.
+> data/ 디렉토리에 GEO에서 GSE154826 데이터를 다운로드해줘. 10x Genomics의 filtered_feature_bc_matrix 형식 파일을 받아줘.
 
 ### Phase 2: 데이터 이해
 
