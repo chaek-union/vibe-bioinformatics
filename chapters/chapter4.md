@@ -8,15 +8,18 @@
 
 비유하자면, 요리를 주문할 때 레시피를 몰라도 되지만, 메뉴판은 읽을 수 있어야 하는 것과 같다. "볶음밥"과 "리조또"의 차이를 모르면 원하는 음식을 주문할 수 없듯이, "박스 플롯"과 "히트맵"의 차이를 모르면 AI에게 원하는 시각화를 요청할 수 없다.
 
-## 4.2 패키지 설치
+## 4.2 프로젝트 환경 구성
 
-Claude Code에게 필요한 패키지 설치를 요청한다:
+3장에서 배운 Docker를 활용하여 분석 환경을 구성한다. Claude Code에게 다음과 같이 요청한다:
 
 ```text
-> pandas, numpy, matplotlib, seaborn, scipy를 설치해줘
+> Python 데이터 분석용 Docker 환경을 만들어줘.
+> pandas, numpy, matplotlib, seaborn, scipy를 포함하고,
+> Jupyter Notebook도 사용할 수 있게 해줘.
+> compose.yml과 Dockerfile을 만들어줘.
 ```
 
-1장에서 글로벌 CLAUDE.md에 uv 사용 규칙을 추가해 두었으므로, Claude Code는 자동으로 `uv pip install` 명령을 사용한다.
+Claude Code가 Dockerfile과 compose.yml을 생성하여, 필요한 패키지가 모두 설치된 컨테이너 환경을 구성해 준다. Docker를 사용하면 "내 컴퓨터에서는 되는데 다른 컴퓨터에서는 안 된다"는 문제를 방지할 수 있다.
 
 패키지 설치 자체는 AI에게 맡길 수 있지만, **어떤 패키지가 어떤 역할을 하는지**는 사람이 알고 있어야 한다. AI의 결과물이 맞는지 판단하려면 각 패키지의 역할을 이해해야 하기 때문이다.
 

@@ -66,10 +66,10 @@ BLAST 검색 기능을 구현하려면 먼저 BLAST+ 도구와 검색 대상 데
 
 ### Docker에 BLAST+ 추가
 
-3장에서 배운 Docker를 활용하여 BLAST+를 개발 환경에 추가한다. Claude Code에게 다음과 같이 요청한다:
+Docker를 활용하여 BLAST+를 개발 환경에 추가한다. Claude Code에게 다음과 같이 요청한다:
 
 ```text
-> 7장에서 만든 Dockerfile에 BLAST+를 추가해줘.
+> 프로젝트의 Dockerfile에 BLAST+를 추가해줘.
 > Alpine Linux에서 ncbi-blast+를 설치하고,
 > 만약 패키지가 없으면 Ubuntu 기반으로 변경해줘.
 ```
