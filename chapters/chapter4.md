@@ -10,7 +10,13 @@
 
 ## 4.2 프로젝트 환경 구성
 
-3장에서 배운 Docker를 활용하여 분석 환경을 구성한다. Claude Code에게 다음과 같이 요청한다:
+먼저 터미널에서 프로젝트 디렉토리를 만든다:
+
+```bash
+mkdir python-data-analysis
+```
+
+VS Code에서 **파일 → 폴더 열기**로 `python-data-analysis` 디렉토리를 연다. 새 창이 열리면, 3장에서 배운 Docker를 활용하여 분석 환경을 구성한다. Claude Code에게 다음과 같이 요청한다:
 
 > Python 데이터 분석용 Docker 환경을 만들어줘. pandas, numpy, matplotlib, seaborn, scipy를 포함하고, Jupyter Notebook도 사용할 수 있게 해줘. compose.yml과 Dockerfile을 만들어줘.
 

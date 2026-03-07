@@ -36,7 +36,13 @@
 
 ## 6.2 환경 구성
 
-Snakemake도 Docker 환경에서 실행하는 것이 재현성 면에서 유리하다. Claude Code에게 다음과 같이 요청한다:
+먼저 터미널에서 프로젝트 디렉토리를 만든다:
+
+```bash
+mkdir snakemake-pipeline
+```
+
+VS Code에서 **파일 → 폴더 열기**로 `snakemake-pipeline` 디렉토리를 연다. 새 창이 열리면, Docker 환경을 구성한다. Snakemake도 Docker 환경에서 실행하는 것이 재현성 면에서 유리하다. Claude Code에게 다음과 같이 요청한다:
 
 > Snakemake 파이프라인 실행용 Docker 환경을 만들어줘. snakemake와 함께 conda/mamba를 포함해서, 각 rule에서 독립적인 Conda 환경을 사용할 수 있게 해줘. compose.yml과 Dockerfile을 만들어줘.
 

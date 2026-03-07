@@ -96,6 +96,8 @@ cd my-bioinfo-app
 pnpm install
 ```
 
+프로젝트 생성이 완료되면, VS Code에서 **파일 → 폴더 열기**로 `my-bioinfo-app` 디렉토리를 연다.
+
 프로젝트 생성 시 다음 옵션을 선택한다:
 
 - Template: **Skeleton project**
