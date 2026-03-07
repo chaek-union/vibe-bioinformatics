@@ -67,7 +67,7 @@ mkdir nsclc-scrna-analysis
 
 VS Code에서 **파일 → 폴더 열기**로 `nsclc-scrna-analysis` 디렉토리를 연다. 새 창이 열리면, 연구 프로젝트의 디렉토리 구조를 Claude Code에게 요청한다:
 
-> 폐암 단일세포 전사체 분석 연구 프로젝트를 생성해줘. 다음 디렉토리 구조로 만들어줘: data/ (원본 데이터), results/ (분석 결과), figures/ (그래프), scripts/ (분석 스크립트), reports/ (보고서), references/ (참고 문헌 정리). README.md에 프로젝트 개요도 작성해줘.
+> 폐암 단일세포 전사체 분석 연구 프로젝트를 생성해줘. 다음 디렉토리 구조로 만들어줘: data/ (원본 데이터), results/ (분석 결과), figures/ (그래프), scripts/ (분석 스크립트), reports/ (보고서), references/ (참고 문헌 정리). README.md에 프로젝트 개요도 작성해줘. .gitignore도 만들어줘. data/ 디렉토리의 대용량 파일, .env, __pycache__/, .ipynb_checkpoints/ 등을 제외해줘.
 
 ### Docker 환경 설정
 
