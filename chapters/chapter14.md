@@ -142,6 +142,27 @@ Hook 설정 예시:
 
 > .claude/hooks/notify.sh를 만들어줘. 첫 번째 인자로 메시지를 받아서 .env의 DISCORD_WEBHOOK_URL로 전송해. curl을 사용하고, 메시지가 비어 있으면 전송하지 마.
 
+Discord Webhook을 설정하는 방법은 다음과 같다:
+
+1. Discord 서버에서 알림을 받을 채널의 **톱니바퀴(설정)**를 클릭한다.
+2. **연동 → 웹후크** 메뉴를 선택한다.
+3. **새 웹후크**를 클릭하고 이름을 설정한다 (예: `NSCLC Analysis Bot`).
+4. **웹후크 URL 복사**를 클릭한다.
+
+복사한 URL을 프로젝트의 `.env` 파일에 저장한다:
+
+```bash
+cp .env.example .env
+```
+
+`.env` 파일을 열고 복사한 URL을 붙여넣는다:
+
+```
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
+```
+
+> **참고**: `.env` 파일에는 API 키나 webhook URL 같은 민감한 정보가 포함되므로, `.gitignore`에 `.env`를 추가하여 Git에 커밋되지 않도록 해야 한다.
+
 ![알림 시스템 구조 — Claude Code Hook이 분석 진행 상황을 Discord/Slack 채널에 전송하는 흐름](../assets/ch14-03-notification-system.png)
 
 ## 14.4 실전 예제: 폐암 단일세포 전사체 분석
