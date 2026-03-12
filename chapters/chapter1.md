@@ -1,14 +1,14 @@
 # 1장. 개발 환경 구성
 
+코딩을 시작하려면 먼저 작업 공간을 갖춰야 한다. 이 장에서는 코드 편집기(VS Code), AI 코딩 에이전트(Claude Code), 그리고 패키지 관리 도구(uv, micromamba)를 설치하고 설정한다. Windows 사용자는 리눅스 환경(WSL)을 먼저 구성해야 하므로 그 과정도 함께 다룬다.
+
 ## 1.1 WSL (Windows Subsystem for Linux)
 
-Windows 사용자는 가장 먼저 **WSL(Windows Subsystem for Linux)**을 설치해야 한다. 웹 개발 및 생명정보학 도구 대부분이 리눅스 환경을 기반으로 하기 때문이다. macOS나 Linux 사용자는 이 절을 건너뛰어도 된다.
+생명정보학 도구 대부분은 리눅스 환경을 전제로 개발되었다. 대용량 시퀀싱 데이터를 처리하는 고성능 서버와 클라우드 인프라(AWS, Google Cloud)가 리눅스로 운영되기 때문이다. samtools, BWA, BLAST+, GATK 같은 핵심 도구들이 모두 리눅스에서 만들어졌고, Windows에서는 직접 실행하기 어렵다. macOS는 유닉스 계열이라 대부분의 도구가 그대로 동작하지만, Windows 사용자는 **WSL(Windows Subsystem for Linux)**을 설치하여 리눅스 환경을 갖춰야 한다. macOS나 Linux 사용자는 이 절을 건너뛰어도 된다.
 
 ### WSL이란?
 
-WSL은 Windows 위에서 리눅스 배포판을 직접 실행할 수 있게 해주는 기능이다. 별도의 가상 머신 없이도 리눅스 터미널과 명령어를 사용할 수 있으며, Windows의 파일 시스템과도 자연스럽게 연동된다.
-
-생명정보학에서 WSL이 중요한 이유가 있다. samtools, STAR, BLAST+ 같은 핵심 도구들은 리눅스용으로 개발되어 Windows에서 직접 실행하기 어렵다. Docker도 리눅스 위에서 동작하는 것이 가장 자연스럽다. WSL을 사용하면 Windows의 편의성을 유지하면서 리눅스 생태계의 모든 도구를 활용할 수 있다.
+WSL은 Windows 위에서 리눅스 배포판을 직접 실행할 수 있게 해주는 기능이다. 별도의 가상 머신 없이도 리눅스 터미널과 명령어를 사용할 수 있다. WSL을 사용하면 Windows의 편의성을 유지하면서 리눅스 생태계의 모든 도구를 활용할 수 있다.
 
 ### WSL 설치
 
