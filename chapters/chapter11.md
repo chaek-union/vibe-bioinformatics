@@ -125,9 +125,9 @@ MCP 서버는 Claude Code가 시작할 때 함께 실행되고, Claude가 필요
 
 ### 자연어로 MCP 서버 설치하기
 
-MCP 서버를 추가하는 가장 간단한 방법은 **Claude Code에게 자연어로 부탁하는 것**이다. 복잡한 명령어 옵션을 외울 필요 없이, 원하는 서버 이름과 설치 범위만 알려주면 Claude가 알아서 등록해 준다. 예를 들어 PubMed MCP 서버를 설치하려면 다음과 같이 요청하면 된다.
+MCP 서버를 추가하는 가장 간단한 방법은 **Claude Code에게 자연어로 부탁하는 것**이다. 복잡한 명령어 옵션을 외울 필요 없이, 서버의 URL과 설치 범위만 알려주면 Claude가 알아서 등록해 준다. 예를 들어 PubMed MCP 서버(https://pubmed.mcp.claude.com/mcp)를 설치하려면 다음과 같이 요청하면 된다.
 
-> PubMed MCP 서버를 전역으로 설치해줘
+> PubMed MCP 서버(https://pubmed.mcp.claude.com/mcp)를 전역으로 설치해줘
 
 이렇게 요청하면 Claude가 적절한 `claude mcp add` 명령을 찾아 실행한다. 설치가 끝나면 Claude Code를 재시작하라는 안내까지 함께 받을 수 있다.
 
