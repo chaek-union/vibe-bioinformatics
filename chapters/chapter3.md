@@ -33,7 +33,7 @@ Docker 컨테이너는 가상 머신(VM)과 비슷해 보이지만, 중요한 �
 | **격리 수준** | 완전한 격리 (별도 OS) | 프로세스 수준 격리 |
 | **사용 사례** | 완전히 다른 OS가 필요할 때 | 애플리케이션 배포, 개발 환경 |
 
-![가상 머신 vs Docker 컨테이너 아키텍처 비교 다이어그램 — VM은 Guest OS 포함, Container는 커널 공유](../assets/ch3-02-vm-vs-docker.png)
+![가상 머신 vs Docker 컨테이너 아키텍처 비교 다이어그램: VM은 Guest OS 포함, Container는 커널 공유](../assets/ch3-02-vm-vs-docker.png)
 
 ## 3.2 Docker 설치
 
@@ -43,25 +43,30 @@ Docker 컨테이너는 가상 머신(VM)과 비슷해 보이지만, 중요한 �
 
 > **중요**: Docker 설치는 **사용자가 직접 터미널에서 수행해야 한다**. 설치 과정에 `sudo`(관리자 권한) 명령이 포함되어 있기 때문이다. `sudo`는 시스템 전체에 영향을 미치는 관리자 권한으로 명령을 실행하는 것이므로, 비밀번호를 입력해야 한다. **LLM(Claude Code 등)에게 sudo 비밀번호를 전달하는 것은 보안상 위험하므로**, sudo가 필요한 설치 작업은 반드시 사용자가 직접 수행한다.
 
-터미널에서 다음 명령을 순서대로 실행한다:
+터미널에서 다음 명령을 순서대로 실행한다. 아래 명령은 Docker 공식 문서(https://docs.docker.com/engine/install/ubuntu/)의 2026년 11월 기준 내용이며, 오류가 나면 공식 문서에서 최신 명령을 확인한다:
 
 ```bash
 # Docker 공식 GPG 키 추가
-sudo apt-get update
-sudo apt-get install ca-certificates curl
+sudo apt update
+sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Docker 저장소 추가
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
 
 # Docker 설치
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 현재 사용자를 docker 그룹에 추가 (sudo 없이 docker 사용 가능)
 sudo usermod -aG docker $USER
@@ -78,7 +83,7 @@ docker --version
 docker run hello-world
 ```
 
-`docker run hello-world`를 실행하면 Docker가 `hello-world` 이미지를 자동으로 다운로드하고 실행한다. "Hello from Docker!"라는 메시지가 출력되면 설치가 성공한 것이다. 이 과정에서 Docker의 핵심 동작 방식 — 이미지 다운로드 → 컨테이너 생성 → 실행 → 종료 — 을 한 번에 체험할 수 있다.
+`docker run hello-world`를 실행하면 Docker가 `hello-world` 이미지를 자동으로 다운로드하고 실행한다. "Hello from Docker!"라는 메시지가 출력되면 설치가 성공한 것이다. 이 과정에서 Docker의 핵심 동작 방식(이미지 다운로드 → 컨테이너 생성 → 실행 → 종료)을 한 번에 체험할 수 있다.
 
 ![docker run hello-world 실행 시 "Hello from Docker!" 메시지가 출력되는 터미널 스크린샷](../assets/ch3-03-terminal-hello-world.png)
 
@@ -90,7 +95,7 @@ Docker에는 세 가지 핵심 개념이 있다: **이미지**, **컨테이너**
 
 Docker 이미지는 컨테이너를 만들기 위한 **설계도**다. 운영체제, 프로그램, 설정 파일 등이 모두 포함되어 있다. Docker Hub(https://hub.docker.com/)에서 다양한 공식 이미지를 다운로드할 수 있다.
 
-이미지는 **읽기 전용(read-only)**이다. 한 번 만들어진 이미지는 변경되지 않으며, 이를 기반으로 여러 개의 컨테이너를 만들 수 있다. 이 책에서 사용하는 대표적인 이미지로는 `node:20-alpine`(Node.js 런타임), `postgres:16-alpine`(PostgreSQL 데이터베이스) 등이 있다.
+이미지는 **읽기 전용(read-only)**이다. 한 번 만들어진 이미지는 변경되지 않으며, 이를 기반으로 여러 개의 컨테이너를 만들 수 있다. 이 책에서 사용하는 대표적인 이미지로는 `node:24-alpine`(Node.js 24 LTS 런타임), `postgres:16-alpine`(PostgreSQL 데이터베이스) 등이 있다.
 
 `alpine`이라는 태그가 붙은 이미지는 Alpine Linux라는 경량 리눅스 배포판을 기반으로 한다. 일반 Ubuntu 기반 이미지가 수백 MB인 데 반해, Alpine 기반 이미지는 수십 MB로 훨씬 가볍다.
 
@@ -105,13 +110,21 @@ Docker 이미지는 컨테이너를 만들기 위한 **설계도**다. 운영체
 Dockerfile은 Docker 이미지를 만들기 위한 **레시피 파일**이다. 어떤 기반 이미지를 사용하고, 어떤 파일을 복사하고, 어떤 명령을 실행할지 순서대로 기술한다.
 
 ```dockerfile
-FROM node:20-alpine      # 기반 이미지: Node.js 20이 설치된 Alpine Linux
-WORKDIR /app             # 작업 디렉토리 설정
-COPY package.json .      # package.json 파일을 컨테이너에 복사
-RUN npm install          # 의존성 설치
-COPY . .                 # 나머지 소스 코드 복사
-CMD ["npm", "run", "dev"] # 컨테이너 시작 시 실행할 명령
+# 기반 이미지: Node.js 24(LTS)가 설치된 Alpine Linux
+FROM node:24-alpine
+# 작업 디렉토리 설정
+WORKDIR /app
+# package.json 파일을 컨테이너에 복사
+COPY package.json .
+# 의존성 설치
+RUN npm install
+# 나머지 소스 코드 복사
+COPY . .
+# 컨테이너 시작 시 실행할 명령
+CMD ["npm", "run", "dev"]
 ```
+
+> **주의**: Dockerfile에서 `#` 주석은 줄 맨 앞에 있을 때만 인식된다. `FROM node:24-alpine  # 설명`처럼 명령 뒤에 주석을 붙이면 주석까지 명령의 인자로 처리되어 빌드 오류가 나거나 의도와 다르게 동작하므로, 주석은 항상 별도의 줄에 쓴다.
 
 Dockerfile의 각 줄은 **레이어(layer)**를 형성한다. Docker는 이 레이어를 캐시하므로, `package.json`이 변경되지 않았다면 `RUN npm install` 단계를 건너뛴다. 그래서 변경 빈도가 낮은 파일(의존성 정의)을 먼저 복사하고, 빈도가 높은 파일(소스 코드)을 나중에 복사하는 것이 효율적이다.
 
@@ -155,11 +168,11 @@ docker compose up
 | `docker compose logs` | 서비스 로그 확인 (에러 디버깅에 유용) |
 | `docker compose logs -f` | 실시간 로그 스트리밍 (Ctrl+C로 중단) |
 | `docker ps` | 실행 중인 컨테이너 목록 확인 |
-| `docker exec -it <컨테이너> bash` | 실행 중인 컨테이너 안으로 접속 (셸 사용) |
+| `docker exec -it <컨테이너> sh` | 실행 중인 컨테이너 안으로 접속 (셸 사용) |
 
 `docker compose up -d`는 특히 유용하다. `-d` 플래그(detached mode)를 붙이면 서비스가 백그라운드에서 실행되므로, 같은 터미널에서 다른 작업을 계속할 수 있다. Claude Code를 사용할 때는 터미널을 AI가 사용하므로, 백그라운드 실행이 편리하다.
 
-`docker exec`는 실행 중인 컨테이너에 직접 접속하는 명령이다. 예를 들어 PostgreSQL 컨테이너에 접속하여 SQL 쿼리를 직접 실행하거나, 앱 컨테이너에서 BLAST+ 명령을 테스트할 때 사용한다.
+`docker exec`는 실행 중인 컨테이너에 직접 접속하는 명령이다. 예를 들어 PostgreSQL 컨테이너에 접속하여 SQL 쿼리를 직접 실행하거나, 앱 컨테이너에서 BLAST+ 명령을 테스트할 때 사용한다. Alpine 기반 이미지에는 `bash`가 설치되어 있지 않으므로 `sh`로 접속한다. Ubuntu나 Debian 기반 이미지라면 `bash`를 사용해도 된다.
 
 ## 3.5 Docker와 바이브 코딩
 

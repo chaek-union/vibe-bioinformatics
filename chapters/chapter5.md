@@ -39,7 +39,7 @@ WGS 분석에는 여러 도구가 사용된다. Claude Code에게 설치와 실�
 | **fastp / Trimmomatic** | 저품질 리드 제거 및 어댑터 트리밍 | fastp이 더 빠르고 간편 |
 | **BWA-MEM2 / minimap2** | 리드를 reference genome에 정렬 | BWA-MEM2가 Illumina short read 표준 |
 | **samtools** | BAM 파일 처리 (정렬, 인덱싱, 통계) | 거의 모든 WGS 파이프라인에 필수 |
-| **GATK** | 변이 검출 (HaplotypeCaller) | Broad Institute에서 개발, 사실상 표준 |
+| **GATK** | 변이 검출 (HaplotypeCaller) | Broad Institute에서 개발, 가장 널리 쓰이는 도구 중 하나 |
 | **bcftools** | VCF 파일 처리 및 필터링 | 변이 통계, 필터링, 병합 |
 | **SnpEff / VEP** | 변이의 기능적 주석 | 아미노산 변화, 유전자 영향 예측 |
 
@@ -47,10 +47,10 @@ WGS 분석에는 여러 도구가 사용된다. Claude Code에게 설치와 실�
 
 ### 실습 데이터
 
-이 장의 WGS 실습에 사용할 샘플 FASTQ 파일을 준비해 두었다. Platinum Genomes(ERR194146)에서 추출한 약 10 MB 크기의 축소 데이터이다:
+이 장의 WGS 실습에 사용할 샘플 FASTQ 파일을 준비해 두었다. 1000 Genomes 프로젝트의 고심도(30x) 전장 유전체 데이터 중 NA12878 샘플(ERR3239334)에서 20번 염색체 44,000,000~45,000,000 구간(1 Mb)에 정렬된 리드 쌍만 뽑은 축소 데이터로, 파일마다 약 10 MB(150 bp paired-end, 약 13만 쌍)이다. 사람 유전체 전체에서 리드를 무작위로 덜어 내면 어느 위치에서도 깊이가 거의 0이 되어 변이를 검출할 수 없으므로, 좁은 구간을 깊게 덮는 데이터를 쓴다:
 
-- [sample_R1.fastq.gz](../assets/sample_R1.fastq.gz) — Forward 리드
-- [sample_R2.fastq.gz](../assets/sample_R2.fastq.gz) — Reverse 리드
+- [sample_R1.fastq.gz](../assets/sample_R1.fastq.gz): Forward 리드
+- [sample_R2.fastq.gz](../assets/sample_R2.fastq.gz): Reverse 리드
 
 프로젝트 디렉토리에 이 파일들을 다운로드한 뒤 아래 실습을 따라 진행하면 된다.
 
@@ -64,7 +64,7 @@ mkdir wgs-analysis
 
 VS Code에서 **파일 → 폴더 열기**로 `wgs-analysis` 디렉토리를 연다. 새 창이 열리면, 분석 환경을 Docker로 구성한다. Claude Code에게 다음과 같이 요청한다:
 
-> WGS 분석용 Docker 환경을 만들어줘. Bioconda 채널에서 fastqc, fastp, bwa-mem2, samtools, gatk4, bcftools를 설치하고, compose.yml과 Dockerfile을 만들어줘.
+> WGS 분석용 Docker 환경을 만들어줘. Bioconda 채널에서 fastqc, fastp, bwa-mem2, samtools, gatk4, bcftools, snpeff를 설치하고, VCF 분석용으로 pandas와 matplotlib, 그래프의 한글이 깨지지 않도록 한글 글꼴(fonts-nanum)도 설치해줘. compose.yml과 Dockerfile을 만들어줘.
 
 실제 분석 과정을 Claude Code와 대화하며 진행하는 예시이다:
 
@@ -72,19 +72,25 @@ VS Code에서 **파일 → 폴더 열기**로 `wgs-analysis` 디렉토리를 연
 
 > fastp로 어댑터 트리밍하고, 품질 30 미만인 리드를 제거해줘
 
-> 트리밍된 리드를 GRCh38 reference genome에 BWA-MEM2로 정렬해줘. 정렬 후 samtools로 정렬, 인덱싱까지 해줘
+> UCSC에서 GRCh38(hg38)의 20번 염색체 서열(https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr20.fa.gz)을 내려받아 레퍼런스로 쓰고, 트리밍된 리드를 BWA-MEM2로 정렬해줘. 정렬 후 samtools로 정렬, 인덱싱까지 해줘
 
-> GATK HaplotypeCaller로 변이를 검출하고, PASS 필터만 남겨줘
+레퍼런스를 20번 염색체 하나로 한정하는 이유는 메모리 때문이다. BWA-MEM2로 사람 유전체 전체의 인덱스를 만들려면 수십 GB(약 28 × 유전체 길이 바이트)의 메모리가 필요해서 일반 노트북에서는 실패하지만, 20번 염색체(약 64 Mb)는 2 GB 안팎이면 충분하다.
 
-> 검출된 VCF 파일에서 exonic 영역의 missense 변이만 추출해줘
+> GATK HaplotypeCaller로 chr20:44,000,000-45,000,000 구간의 변이를 검출하고, GATK 권장 하드 필터(VariantFiltration)를 적용한 뒤 PASS 변이만 남겨줘
 
-각 단계에서 사용자가 알아야 하는 것은 "어댑터 트리밍이 왜 필요한지", "매핑 퀄리티가 무엇인지", "missense 변이가 무엇인지" 같은 **도메인 지식**이다. 명령어의 구체적인 옵션은 Claude Code가 처리해 준다.
+> SnpEff로 필터링된 VCF에 GRCh38 기준 기능 주석을 달아줘
+
+> 주석이 달린 VCF에서 missense 변이만 추출해줘
+
+이 데이터로 끝까지 진행하면 평균 깊이 약 38x에서 1,000개 남짓의 변이(대부분 SNP)가 검출되고, 주석 단계에서 ADA, KCNK15 같은 유전자의 missense 변이 몇 개를 확인할 수 있다.
+
+각 단계에서 사용자가 알아야 하는 것은 "어댑터 트리밍이 왜 필요한지", "매핑 퀄리티가 무엇인지", "missense 변이가 무엇인지" 같은 **도메인 지식**이다. 예를 들어 HaplotypeCaller가 막 출력한 VCF는 FILTER 열이 비어 있어(`.`) 필터를 적용해야 비로소 PASS 표시가 붙고, missense 여부는 SnpEff 같은 주석 도구를 거쳐야 알 수 있다. 명령어의 구체적인 옵션은 Claude Code가 처리해 준다.
 
 ### Python으로 VCF 분석하기
 
 변이 검출이 끝나면, Python으로 결과를 분석하고 시각화할 수 있다. 4장에서 배운 pandas와 matplotlib이 여기서 활용된다.
 
-> VCF 파일을 읽어서 변이 유형별(SNP/InDel) 통계와 염색체별 분포를 시각화해줘
+> VCF 파일을 읽어서 변이 유형별(SNP/InDel) 통계와 구간 내 위치별 분포를 시각화해줘
 
 이 프롬프트에 대해 Claude Code가 생성하는 코드는 다음과 같다:
 
@@ -92,23 +98,33 @@ VS Code에서 **파일 → 폴더 열기**로 `wgs-analysis` 디렉토리를 연
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# 한글 글꼴 지정 (Docker에 fonts-nanum 설치 필요, 지정하지 않으면 한글이 깨진다)
+plt.rcParams["font.family"] = "NanumGothic"
+
 # VCF 파일을 pandas로 읽기 (헤더 행 건너뛰기)
 vcf = pd.read_csv("variants.vcf", sep="\t", comment="#",
                    names=["CHROM", "POS", "ID", "REF", "ALT",
                           "QUAL", "FILTER", "INFO", "FORMAT", "SAMPLE"])
 
-# 변이 유형별 개수
-print(f"총 변이 수: {len(vcf)}")
-print(f"SNP: {len(vcf[vcf['REF'].str.len() == vcf['ALT'].str.len()])}")
-print(f"InDel: {len(vcf[vcf['REF'].str.len() != vcf['ALT'].str.len()])}")
+# ALT가 "G,T"처럼 여러 개인 다중 대립유전자 변이는 대립유전자별로 행을 나눈다
+vcf["ALT"] = vcf["ALT"].str.split(",")
+vcf = vcf.explode("ALT")
+vcf = vcf[vcf["ALT"] != "*"]  # "*"는 다른 결실에 겹친 자리를 뜻하므로 제외
 
-# 염색체별 변이 분포 시각화
-vcf["CHROM"].value_counts().sort_index().plot(kind="bar")
-plt.title("염색체별 변이 수")
-plt.xlabel("염색체")
+# 변이 유형별 개수 (대립유전자 기준)
+is_snp = (vcf["REF"].str.len() == 1) & (vcf["ALT"].str.len() == 1)
+is_indel = vcf["REF"].str.len() != vcf["ALT"].str.len()
+print(f"총 변이 수: {len(vcf)}")
+print(f"SNP: {is_snp.sum()}")
+print(f"InDel: {is_indel.sum()}")
+
+# 위치별 변이 분포 시각화 (실습 데이터는 chr20의 1 Mb 구간이므로 염색체별 대신 위치별로 본다)
+plt.hist(vcf["POS"] / 1e6, bins=50)
+plt.title("chr20 구간 내 위치별 변이 수")
+plt.xlabel("위치 (Mb)")
 plt.ylabel("변이 수")
 plt.tight_layout()
-plt.savefig("variants_per_chromosome.png")
+plt.savefig("variants_by_position.png")
 ```
 
 이처럼 AI에게 요청하면 코드를 직접 작성하지 않아도 분석과 시각화를 수행할 수 있다.
@@ -132,7 +148,9 @@ plt.savefig("variants_per_chromosome.png")
 
 단일세포 분석 환경도 Docker로 구성한다. Claude Code에게 다음과 같이 요청한다:
 
-> 단일세포 RNA-seq 분석용 Docker 환경을 만들어줘. scanpy, anndata, mudata를 포함하고, Jupyter Notebook도 사용할 수 있게 해줘. compose.yml과 Dockerfile을 만들어줘.
+> 단일세포 RNA-seq 분석용 Docker 환경을 만들어줘. Python 3.13 기반으로 scanpy는 Leiden 클러스터링 의존성까지 포함해 1.13 버전(`scanpy[leiden]==1.13.*`)으로 고정하고, anndata, mudata, Jupyter Notebook, 한글 글꼴(fonts-nanum)도 설치해줘. compose.yml과 Dockerfile을 만들어줘.
+
+이 장의 Scanpy 코드는 Scanpy 1.13 기준이다. Scanpy는 버전에 따라 함수의 인자가 바뀌기도 하므로, 이처럼 버전을 고정해 두어야 책의 코드와 실행 결과가 어긋나지 않는다.
 
 각 패키지의 역할을 알아야 AI에게 올바른 분석을 요청할 수 있다:
 
@@ -144,7 +162,7 @@ plt.savefig("variants_per_chromosome.png")
 
 Scanpy는 **scverse** 생태계의 일부이다. scverse는 단일세포 데이터 분석을 위한 Python 패키지 모음으로, Scanpy를 중심으로 squidpy(공간 전사체), scvi-tools(딥러닝 기반 분석), muon(멀티오믹스) 등이 포함된다. 하나의 일관된 데이터 구조(AnnData)를 공유하므로, 여러 패키지를 조합하여 분석할 수 있다.
 
-### AnnData — 단일세포 데이터 구조
+### AnnData: 단일세포 데이터 구조
 
 h5ad는 단일세포 데이터의 **표준 저장 형식**이다. HDF5 기반으로, 대용량 데이터를 효율적으로 저장하고 읽을 수 있다. 10,000개의 세포와 20,000개의 유전자를 포함하는 데이터를 CSV로 저장하면 수 GB가 되지만, h5ad로 저장하면 수십~수백 MB로 줄어든다.
 
@@ -162,9 +180,9 @@ h5ad는 단일세포 데이터의 **표준 저장 형식**이다. HDF5 기반으
 
 이 구조의 장점은 **하나의 파일에 분석에 필요한 모든 것이 담겨 있다**는 점이다. 발현 데이터, 세포 메타데이터, 분석 결과(UMAP 좌표, 클러스터 레이블 등)가 하나의 객체에 통합되어 있으므로, 데이터를 주고받을 때 파일 하나만 전달하면 된다.
 
-### MuData — 멀티오믹스 데이터
+### MuData: 멀티오믹스 데이터
 
-최근에는 하나의 세포에서 RNA와 단백질(CITE-seq), 또는 RNA와 염색질 접근성(10x Multiome)을 동시에 측정하는 **멀티오믹스** 기술이 발전하고 있다. h5mu는 이런 멀티오믹스 데이터를 저장하는 형식이다.
+하나의 세포에서 RNA와 단백질(CITE-seq), 또는 RNA와 염색질 접근성(10x Multiome)을 동시에 측정하는 **멀티오믹스** 기술도 널리 쓰인다. h5mu는 이런 멀티오믹스 데이터를 저장하는 형식이다.
 
 > pbmc_10k_preprocessed.h5mu 파일을 읽고, RNA와 ATAC 데이터를 각각 분리해줘
 
@@ -175,13 +193,15 @@ import mudata as md
 mdata = md.read_h5mu("pbmc_10k_preprocessed.h5mu")
 
 # 개별 modality 접근
-rna = mdata.mod["rna"]    # RNA 데이터 (AnnData)
-atac = mdata.mod["atac"]  # ATAC 데이터 (AnnData)
+rna = mdata.mod["rna_subset"]    # RNA 데이터 (AnnData)
+atac = mdata.mod["atac_subset"]  # ATAC 데이터 (AnnData)
 ```
+
+modality의 이름은 파일마다 다르다. 이 실습 파일에서는 `rna_subset`, `atac_subset`이며, `print(mdata)`로 먼저 확인할 수 있다.
 
 ![MuData 객체의 구조 다이어그램](../assets/ch5-02-mudata-structure.png)
 
-각 modality는 독립적인 AnnData 객체이므로, RNA 데이터에는 Scanpy를, ATAC 데이터에는 SnapATAC이나 ArchR의 Python 래퍼를 사용하는 식으로 각각에 적합한 분석 방법을 적용할 수 있다.
+각 modality는 독립적인 AnnData 객체이므로, RNA 데이터에는 Scanpy를, ATAC 데이터에는 SnapATAC2나 muon의 ATAC 모듈(`muon.atac`)을 사용하는 식으로 각각에 적합한 분석 방법을 적용할 수 있다.
 
 ### Scanpy 분석 워크플로우
 
@@ -198,53 +218,72 @@ atac = mdata.mod["atac"]  # ATAC 데이터 (AnnData)
 > 미토콘드리아 유전자 비율을 계산하고, QC 지표들을 바이올린 플롯으로 시각화해줘
 
 ```python
+import scanpy as sc
+
+adata = mdata.mod["rna_subset"]  # h5mu에서 RNA 데이터(AnnData) 꺼내기
+
 # 미토콘드리아 유전자 비율 계산
 adata.var["mt"] = adata.var_names.str.startswith("MT-")
-sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
+sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], out=False)  # out=False: 결과를 adata.obs/var에 바로 저장
 
 # QC 시각화
 sc.pl.violin(adata, ["n_genes_by_counts", "total_counts", "pct_counts_mt"])
 ```
 
-![QC 바이올린 플롯](../assets/ch5-03-qc-violin-plots.png)
+이 실습 파일로 실행하면 그래프가 교과서적인 모습과 조금 다르게 나온다. 파일이 scvi-tools 튜토리얼용으로 고변동 유전자 4,000개만 남긴 데이터라서 미토콘드리아(MT-) 유전자가 없고, 따라서 `pct_counts_mt`는 모든 세포에서 0이다. 원본 10x 데이터에서는 이 값이 손상된 세포를 거르는 핵심 지표가 된다. 또 세포 중 약 4,000개는 튜토리얼에서 RNA 정보를 지운 ATAC 전용 세포라서 유전자 수와 UMI 수가 0으로 나타나며, 유전자 수 200개 미만 필터에서 함께 제거된다.
+
+![QC 바이올린 플롯 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본 pbmc_10k_preprocessed.h5mu, 2025)](../assets/ch5-03-qc-violin-plots.png)
 
 **정규화 및 전처리**
 
 각 세포마다 시퀀싱 깊이(total read count)가 다르다. 정규화는 이 차이를 보정하여 세포 간 공정한 비교를 가능하게 한다. **고변동 유전자(HVG)** 선택은 세포 유형을 구분하는 데 기여하는 유전자만 골라내어 분석의 효율과 정확도를 높인다.
 
+> 정규화하고 고변동 유전자 2000개를 선택한 뒤 PCA를 수행해줘
+
+```python
+sc.pp.normalize_total(adata, target_sum=1e4)  # 세포마다 총 발현량을 1만으로 맞춤
+sc.pp.log1p(adata)                            # 로그 변환
+sc.pp.highly_variable_genes(adata, n_top_genes=2000)
+sc.pp.pca(adata, n_comps=50)
+```
+
 **차원 축소 및 클러스터링**
 
-2,000개의 유전자를 사용한다면 각 세포는 2,000차원 공간의 한 점이다. PCA로 50차원으로 압축한 뒤, UMAP으로 2차원 시각화를 수행한다. 이후 Leiden 알고리즘으로 유사한 세포들을 클러스터로 묶는다.
+2,000개의 유전자를 사용한다면 각 세포는 2,000차원 공간의 한 점이다. PCA로 50차원으로 압축한 뒤, 이 공간에서 서로 가까운 세포끼리 연결한 이웃 그래프(neighbor graph)를 만든다. UMAP은 이 그래프를 바탕으로 2차원 시각화를 수행하고, Leiden 알고리즘도 같은 그래프를 이용해 유사한 세포들을 클러스터로 묶는다.
 
 > Leiden 클러스터링을 resolution 0.5로 수행하고, UMAP에 클러스터를 색상으로 표시해줘
 
 ```python
-sc.tl.leiden(adata, resolution=0.5)
+sc.pp.neighbors(adata)  # 이웃 그래프 생성 (PCA 결과 사용)
+sc.tl.umap(adata)
+sc.tl.leiden(adata, resolution=0.5, flavor="igraph", n_iterations=2)
 sc.pl.umap(adata, color="leiden")
 ```
 
-![UMAP 플롯](../assets/ch5-04-umap-clusters.png)
+`flavor="igraph"`는 Scanpy가 권장하는 빠른 Leiden 구현을 사용하라는 뜻이다. 생략하면 예전 구현(leidenalg)이 쓰이면서, 앞으로 기본값이 바뀐다는 경고(FutureWarning)가 출력된다.
+
+![UMAP 플롯 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본 pbmc_10k_preprocessed.h5mu, 2025)](../assets/ch5-04-umap-clusters.png)
 
 **세포 유형 주석**
 
 각 클러스터에서 특이적으로 높게 발현되는 **마커 유전자**를 확인하고, 이를 바탕으로 세포 유형을 결정한다.
 
-> 클러스터별 마커 유전자를 찾고, CD3E, CD14, MS4A1, NKG7 발현을 UMAP에 표시해줘
+> 클러스터별 마커 유전자를 찾고, CD3G, CD14, MS4A1, NKG7 발현을 UMAP에 표시해줘
 
 ```python
 sc.tl.rank_genes_groups(adata, groupby="leiden")
-sc.pl.umap(adata, color=["CD3E", "CD14", "MS4A1", "NKG7"])
+sc.pl.umap(adata, color=["CD3G", "CD14", "MS4A1", "NKG7"])
 ```
 
-![마커 유전자별 UMAP 플롯](../assets/ch5-05-umap-marker-genes.png)
+![마커 유전자별 UMAP 플롯 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본 pbmc_10k_preprocessed.h5mu, 2025)](../assets/ch5-05-umap-marker-genes.png)
 
-예를 들어 CD3E가 높게 발현되는 클러스터는 T 세포, CD14가 높은 클러스터는 단핵구(monocyte), MS4A1(CD20)이 높은 클러스터는 B 세포일 가능성이 높다. 이런 마커 유전자 해석은 면역학, 세포생물학 등 도메인 지식에 기반한다.
+예를 들어 CD3G(T 세포 수용체와 함께 작동하는 CD3 복합체의 구성 요소)가 높게 발현되는 클러스터는 T 세포, CD14가 높은 클러스터는 단핵구(monocyte), MS4A1(CD20)이 높은 클러스터는 B 세포, NKG7이 높은 클러스터는 NK 세포일 가능성이 높다. T 세포 마커로 흔히 쓰는 CD3E는 이 실습 파일의 4,000개 유전자에 들어 있지 않아서 같은 복합체의 CD3G를 대신 쓴다. 이런 마커 유전자 해석은 면역학, 세포생물학 등 도메인 지식에 기반한다.
 
 ### 실습 데이터
 
 단일세포 분석 실습에는 10x Genomics PBMC 10k 데이터셋을 전처리한 h5mu 파일을 사용한다. 다음 링크에서 다운로드할 수 있다:
 
-- [pbmc_10k_preprocessed.h5mu](https://doi.org/10.6084/m9.figshare.28555748) — PBMC 10k 전처리 데이터 (figshare)
+- [pbmc_10k_preprocessed.h5mu](https://doi.org/10.6084/m9.figshare.28555748): PBMC 10k 전처리 데이터 (figshare)
 
 ### Claude Code로 단일세포 분석하기
 
@@ -252,7 +291,7 @@ sc.pl.umap(adata, color=["CD3E", "CD14", "MS4A1", "NKG7"])
 
 > 정규화하고 고변동 유전자 2000개 선택해서 PCA, UMAP 해줘
 
-> Leiden 클러스터링 해주고, CD3E, CD14, MS4A1, NKG7 마커로 세포 유형을 UMAP에 표시해줘
+> Leiden 클러스터링 해주고, CD3G, CD14, MS4A1, NKG7 마커로 세포 유형을 UMAP에 표시해줘
 
 이 대화에서 사용자는 코드를 한 줄도 작성하지 않았지만, **각 단계가 왜 필요한지, 어떤 파라미터를 사용해야 하는지**를 알고 있었기 때문에 정확한 지시를 내릴 수 있었다.
 
@@ -266,7 +305,7 @@ sc.pl.umap(adata, color=["CD3E", "CD14", "MS4A1", "NKG7"])
 |------|------|
 | **FASTQ** | 시퀀서에서 나온 원시 리드 데이터. 염기 서열 + 품질 점수 |
 | **정렬 (Alignment)** | 리드를 reference genome에 매핑하는 과정. BWA-MEM2가 표준 |
-| **변이 검출 (Variant Calling)** | reference genome과 다른 부분을 찾는 과정. GATK HaplotypeCaller가 표준 |
+| **변이 검출 (Variant Calling)** | reference genome과 다른 부분을 찾는 과정. GATK HaplotypeCaller가 대표적 |
 | **VCF** | 변이 정보를 저장하는 파일 형식. 위치, 유형, 품질 등을 포함 |
 | **SNP / InDel** | 단일 염기 변이(SNP)와 삽입/결실(InDel). 가장 흔한 변이 유형 |
 
@@ -285,6 +324,6 @@ sc.pl.umap(adata, color=["CD3E", "CD14", "MS4A1", "NKG7"])
 
 - **WGS 분석**: FASTQ → 트리밍 → 정렬(BAM) → 변이 검출(VCF) → 주석 → 해석
   - 파일 형식(FASTQ, BAM, VCF, BED)과 각 도구의 역할을 이해하면 Claude Code에게 파이프라인 구성을 요청할 수 있다
-- **단일세포 분석**: h5ad 로딩 → QC → 정규화 → HVG 선택 → PCA → UMAP → 클러스터링 → 세포 유형 주석
+- **단일세포 분석**: h5ad/h5mu 로딩 → QC → 정규화 → HVG 선택 → PCA → UMAP → 클러스터링 → 세포 유형 주석
   - AnnData 구조와 각 분석 단계의 목적을 이해하면 정확한 지시를 내릴 수 있다
 - **공통 원칙**: 바이브 코딩의 핵심은 분석 파이프라인의 각 단계가 **왜 필요한지**를 이해하고, AI에게 단계별로 지시하는 것이다. 명령어를 외울 필요는 없지만, 도메인 지식은 반드시 필요하다

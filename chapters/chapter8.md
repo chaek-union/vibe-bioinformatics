@@ -51,23 +51,31 @@ Hero Section은 랜딩 페이지의 가장 **눈에 띄는 첫 번째 영역**�
 
 ### Carousel
 
-Carousel(캐러셀)은 여러 이미지나 콘텐츠를 **슬라이드 형태**로 보여주는 요소이다. 여러 기능이나 특징을 순차적으로 소개할 때 유용하다. 좌우 화살표로 넘기거나, 자동으로 일정 시간 간격으로 전환되도록 설정할 수 있다.
+Carousel(캐러셀)은 여러 장의 콘텐츠를 **슬라이드 형태**로 번갈아 보여주는 요소이다. 주로 **Hero Section 안에** 넣어, 한 자리에서 대표 소개 문구, 새 기능 소식, 행사 안내 같은 여러 메시지를 차례로 보여 준다. 좌우 화살표로 넘기거나, 일정 시간마다 자동으로 다음 슬라이드로 넘어가게 할 수 있고, 아래쪽의 점(indicator)으로 지금 몇 번째 슬라이드인지 표시한다.
 
-다만, 캐러셀은 사용자가 원하는 정보를 놓칠 수 있다는 단점이 있다. 자동 슬라이드가 빠르면 내용을 다 읽기 전에 넘어가고, 느리면 사용자가 기다려야 한다. 핵심 정보는 캐러셀에만 의존하지 말고, 별도 섹션에도 표시하는 것이 좋다.
+다만, 캐러셀은 사용자가 원하는 정보를 놓칠 수 있다는 단점이 있다. 자동 슬라이드가 빠르면 내용을 다 읽기 전에 넘어가고, 느리면 사용자가 기다려야 한다. 핵심 정보는 캐러셀에만 의존하지 말고, 본문에도 함께 표시하는 것이 좋다.
 
-![Carousel 컴포넌트 예시](../assets/ch8-05-carousel-example.png)
+![Carousel 예시: 가운데 슬라이드 양옆으로 이전/다음 슬라이드가 이어지고, 좌우 화살표와 아래쪽 점으로 위치를 표시한다](../assets/ch8-05-carousel-example.png)
 
-### Features Section
+### 콘텐츠 영역
 
-웹 도구의 주요 기능을 소개하는 영역이다. 보통 **카드(Card)** 형태로 3~4개의 핵심 기능을 나열한다. 각 카드에는 아이콘, 기능 이름, 간단한 설명을 포함한다.
+Hero Section 아래부터 Footer 위까지가 본문에 해당하는 **콘텐츠 영역**이다. 사이트에서 전하고 싶은 내용을 여러 형태의 블록으로 나누어 위에서 아래로 쌓는다. 자주 쓰는 블록은 다음과 같다.
 
-생명정보학 웹 도구의 Features Section이라면 "Reverse Complement", "Sequence Alignment", "BLAST Search" 같은 핵심 도구를 카드로 보여줄 수 있다. 카드를 클릭하면 해당 도구 페이지로 이동하도록 구현하면, 사용자가 원하는 기능에 빠르게 접근할 수 있다.
+| 블록 | 내용 | 예시 |
+|------|------|------|
+| **Card 목록** | 같은 형식의 항목을 카드로 나란히 배치 | 제공하는 분석 도구 3~4개 |
+| **이미지 + 설명** | 그림과 설명 글을 좌우로 나란히 배치 | 분석 흐름도와 사용 방법 설명 |
+| **숫자 지표** | 강조하고 싶은 숫자를 크게 표시 | 도구 수, 지원 생물종 수, 분석 건수 |
+| **소식 목록** | 날짜와 제목을 목록으로 표시 | 새 기능 추가, 데이터베이스 업데이트 |
+| **인용 안내** | 논문에 인용할 문헌 정보와 복사 버튼 | 도구를 소개한 논문 |
 
-![Features Section 예시](../assets/ch8-06-features-section.png)
+![콘텐츠 영역 예시: Card 목록, 이미지 + 설명, 숫자 지표, 소식 목록, 인용 안내 블록을 쌓은 본문](../assets/ch8-06-content-area.png)
+
+어떤 블록을 어떤 순서로 쌓을지는 사이트의 목적에 따라 정한다. AI에게 요청할 때는 "Hero 아래에 도구 Card 3개, 그 아래에 분석 흐름 그림과 설명을 나란히 놓은 블록, 맨 아래에 인용 안내를 넣어줘"처럼 블록 이름을 위에서부터 순서대로 말하면 된다.
 
 ## 8.3 UI 컴포넌트
 
-자주 사용되는 웹 구성 요소를 패턴화한 것을 **UI 컴포넌트**라 한다. 2011년 등장한 트위터 부트스트랩 프레임워크(https://getbootstrap.com/docs/4.0/components/)에서 유래된 것들이 많다. 이 컴포넌트들의 이름을 아는 것이 중요한 이유는, AI에게 디자인을 요청할 때 정확한 이름을 사용하면 의도한 결과를 얻기 훨씬 쉽기 때문이다.
+자주 사용되는 웹 구성 요소를 패턴화한 것을 **UI 컴포넌트**라 한다. 2011년 공개된 트위터 부트스트랩 프레임워크(https://getbootstrap.com/docs/5.3/components/)에서 유래된 것들이 많다. 이 컴포넌트들의 이름을 아는 것이 중요한 이유는, AI에게 디자인을 요청할 때 정확한 이름을 사용하면 의도한 결과를 얻기 훨씬 쉽기 때문이다.
 
 "상단에 메뉴 바를 만들어줘"보다 "상단에 Navbar를 만들어줘"가 더 정확한 결과를 낸다. "슬라이드 형태로 보여줘"보다 "Carousel로 보여줘"가 더 명확하다.
 
@@ -89,7 +97,7 @@ Carousel(캐러셀)은 여러 이미지나 콘텐츠를 **슬라이드 형태**�
 
 ### 이미지 생성 AI를 활용한 디자인
 
-Google Gemini, ChatGPT(DALL-E), Midjourney 등의 AI를 통해 디자인 목업을 생성할 수 있다. 앞서 배운 Header, Body, Footer 및 컴포넌트 개념을 활용하여 프롬프트를 구체적으로 작성하면 더 정확한 결과를 얻을 수 있다.
+Google Gemini, ChatGPT, Midjourney 같은 이미지 생성 AI를 통해 디자인 목업을 생성할 수 있다. 앞서 배운 Header, Body, Footer 및 컴포넌트 개념을 활용하여 프롬프트를 구체적으로 작성하면 더 정확한 결과를 얻을 수 있다.
 
 **기본 프롬프트 예시:**
 
@@ -101,15 +109,21 @@ Google Gemini, ChatGPT(DALL-E), Midjourney 등의 AI를 통해 디자인 목업�
 
 **더 구체적인 프롬프트 예시:**
 
-> Header: 좌측에 로고, 우측에 Home/Tools/About/Contact 메뉴가 있는 Navbar. Hero Section: 배경은 그라데이션, 좌측에 헤드라인 "Bioinformatics Tools for Everyone", 서브라인 "AI-powered sequence analysis", CTA 버튼 "Get Started". 우측에는 DNA 구조 일러스트. Features: 3개의 Card — Reverse Complement, Sequence Alignment, BLAST Search. Footer: 로고(흑백), 링크 목록, 저작권 정보.
+> Header: 좌측에 로고, 우측에 Home/Tools/About/Contact 메뉴가 있는 Navbar. Hero Section: 배경은 그라데이션, 좌측에 헤드라인 "Bioinformatics Tools for Everyone", 서브라인 "AI-powered sequence analysis", CTA 버튼 "Get Started". 우측에는 DNA 구조 일러스트. 그 아래에 3개의 Card(Reverse Complement, Sequence Alignment, BLAST Search). Footer: 로고(흑백), 링크 목록, 저작권 정보.
 
 프롬프트가 구체적일수록 원하는 결과에 가까운 디자인이 나온다. 여기서 "Navbar", "Hero Section", "CTA 버튼", "Card" 같은 용어를 사용하는 것이 핵심이다. 이 용어들은 웹 디자인의 공통 언어이므로, AI가 정확하게 해석할 수 있다.
 
 ![상세 디자인 목업](../assets/ch8-08-detailed-mockup.png)
 
-### Claude Code의 design 스킬
+### Claude Code로 목업 구현하기
 
-Claude Code에는 **design 스킬**이 내장되어 있어, 디자인 목업 이미지를 기반으로 실제 코드를 생성할 수 있다. 디자인 목업 이미지를 Claude Code 채팅창에 복사 붙여넣기한 뒤 구현을 요청하면 된다.
+Claude Code는 채팅창에 붙여넣은 이미지를 분석할 수 있으므로, 디자인 목업 이미지를 기반으로 실제 코드를 생성할 수 있다. 디자인 목업 이미지를 Claude Code 채팅창에 복사 붙여넣기한 뒤 구현을 요청하면 된다.
+
+여기에 Anthropic이 공식 플러그인 마켓플레이스에서 제공하는 **frontend-design 플러그인**을 설치해 두면 좋다. 이 플러그인에 포함된 스킬은 웹 페이지나 컴포넌트를 만들 때 자동으로 동작하여, 흔한 기본값을 그대로 쓰기보다 의도가 분명한 디자인을 내도록 돕는다. 플러그인은 따로 설치해야 하며, Claude Code에서 다음 명령을 실행한 뒤 설치 범위를 선택하면 된다:
+
+```
+/plugin install frontend-design@claude-plugins-official
+```
 
 > 이 디자인 목업을 참고하여 랜딩 페이지를 SvelteKit + Tailwind CSS로 구현해줘. (이미지를 복사 붙여넣기)
 
@@ -121,30 +135,15 @@ Claude Code는 이미지를 분석하여 레이아웃, 색상, 컴포넌트 구�
 
 ### 레이아웃 구성
 
-SvelteKit에서는 `src/routes/+layout.svelte` 파일이 모든 페이지에 공통으로 적용되는 레이아웃을 정의한다. Header와 Footer를 여기에 배치하면, 모든 페이지에 자동으로 같은 Header와 Footer가 표시된다. 새 페이지를 추가할 때마다 Header와 Footer를 다시 작성할 필요가 없다.
+SvelteKit에서는 `src/routes/+layout.svelte` 파일이 모든 페이지에 공통으로 적용되는 레이아웃을 정의한다. Header와 Footer를 여기에 배치하면 어떤 페이지를 열든 같은 Header와 Footer가 표시되고, 각 페이지의 고유한 내용은 그 사이에 들어간다. 새 페이지를 추가할 때마다 Header와 Footer를 다시 만들 필요가 없다.
 
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import '../app.css';
-</script>
+> Header와 Footer를 공통 레이아웃에 넣어서 모든 페이지에 표시되게 해줘. 기존 코드는 유지해줘
 
-<Header />
-<main>
-  <slot />
-</main>
-<Footer />
-```
-
-`<slot />`은 각 페이지의 고유 콘텐츠가 들어가는 자리이다. `/` URL로 접속하면 `+page.svelte`의 내용이 `<slot />` 위치에 삽입되고, `/tools` URL로 접속하면 `tools/+page.svelte`의 내용이 삽입된다. Header와 Footer는 어떤 페이지를 열든 항상 동일하게 유지된다.
-
-`$lib`은 SvelteKit에서 `src/lib/` 디렉토리를 가리키는 별칭(alias)이다. `$lib/components/Header.svelte`라고 쓰면 `src/lib/components/Header.svelte` 파일을 가져온다.
+`npx sv create`로 만든 레이아웃에는 favicon과 다국어(Paraglide) 설정이 이미 들어 있으므로, "기존 코드는 유지해줘"를 덧붙이는 것이 안전하다.
 
 ### 컴포넌트 분리
 
-각 UI 요소를 별도의 Svelte 컴포넌트로 분리하여 `src/lib/components/` 디렉토리에 저장한다:
+각 UI 요소를 별도의 컴포넌트로 분리하여 `src/lib/components/` 디렉토리에 저장한다:
 
 ```
 src/lib/components/
@@ -155,62 +154,32 @@ src/lib/components/
 └── Carousel.svelte     # 캐러셀 (필요 시)
 ```
 
-컴포넌트를 분리하면 여러 이점이 있다. 먼저 재사용이 가능하다. FeatureCard 컴포넌트를 한 번 만들면, 랜딩 페이지뿐 아니라 다른 페이지에서도 사용할 수 있다. 또한 유지보수가 쉽다. Footer를 수정하고 싶으면 `Footer.svelte` 파일 하나만 수정하면 모든 페이지에 반영된다. AI에게 수정을 요청할 때도 "Footer.svelte의 저작권 연도를 2025로 바꿔줘"처럼 구체적으로 지시할 수 있다.
+컴포넌트를 분리하면 여러 이점이 있다. 먼저 재사용이 가능하다. FeatureCard 컴포넌트를 한 번 만들면, 랜딩 페이지뿐 아니라 다른 페이지에서도 사용할 수 있다. 또한 유지보수가 쉽다. Footer를 수정하고 싶으면 Footer 컴포넌트 하나만 고치면 모든 페이지에 반영된다. AI에게 수정을 요청할 때도 "Footer의 저작권 연도가 항상 올해로 표시되게 바꿔줘"처럼 대상을 분명히 지시할 수 있다.
+
+컴포넌트는 바깥에서 값을 받아 내용을 바꿀 수도 있다. 기능 카드처럼 모양은 같고 제목과 설명만 다른 요소는 컴포넌트 하나를 만들어 두고 내용만 바꿔 끼워 쓴다.
+
+> 기능 카드를 FeatureCard 컴포넌트로 분리하고, 카드마다 제목과 설명을 바꿔 넣을 수 있게 해줘
 
 ### 랜딩 페이지 조립
 
-`src/routes/+page.svelte`에서 컴포넌트들을 조립하여 랜딩 페이지를 완성한다:
+메인 페이지(`src/routes/+page.svelte`)에서 만들어 둔 컴포넌트들을 조립하여 랜딩 페이지를 완성한다.
 
-```svelte
-<!-- src/routes/+page.svelte -->
-<script>
-  import Hero from '$lib/components/Hero.svelte';
-  import FeatureCard from '$lib/components/FeatureCard.svelte';
-</script>
+> Hero 섹션 아래에 "주요 기능" 섹션을 만들고, Reverse Complement, Sequence Alignment, BLAST Search 세 개의 FeatureCard를 배치해줘. 모바일에서는 1열, 데스크톱에서는 3열로 보여줘
 
-<Hero />
-
-<section class="py-16 px-4 max-w-6xl mx-auto">
-  <h2 class="text-3xl font-bold text-center mb-12">주요 기능</h2>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <FeatureCard
-      title="Reverse Complement"
-      description="DNA 시퀀스의 역상보 서열을 생성합니다."
-    />
-    <FeatureCard
-      title="Sequence Alignment"
-      description="두 시퀀스 간의 정렬을 수행합니다."
-    />
-    <FeatureCard
-      title="BLAST Search"
-      description="데이터베이스에서 유사 서열을 검색합니다."
-    />
-  </div>
-</section>
-```
-
-여기서 Tailwind CSS 클래스의 의미를 간단히 살펴보면:
-- `py-16`: 위아래 패딩 4rem
-- `max-w-6xl mx-auto`: 최대 너비 72rem, 좌우 자동 여백으로 중앙 정렬
-- `grid grid-cols-1 md:grid-cols-3`: 모바일에서는 1열, 태블릿 이상(md)에서는 3열 그리드
-- `gap-8`: 그리드 항목 간 간격 2rem
-
-`md:grid-cols-3`에서 `md:`는 Tailwind의 반응형 접두사이다. 화면 너비가 768px 이상일 때만 적용된다는 뜻이다. 이렇게 하면 모바일에서는 카드가 세로로 쌓이고, 태블릿이나 데스크톱에서는 가로로 나란히 표시된다. 이를 **모바일 퍼스트(mobile-first)** 접근이라 한다.
-
-이런 Tailwind 클래스를 모두 외울 필요는 없다. AI에게 "카드를 모바일에서는 1열, 데스크톱에서는 3열로 배치해줘"라고 요청하면 적절한 클래스를 생성해 준다. 다만, "반응형", "모바일 퍼스트", "그리드" 같은 개념을 알아야 이런 요청을 할 수 있다.
+화면 너비에 따라 배치를 바꾸는 것을 **반응형(responsive) 디자인**이라 한다. 위 요청처럼 작은 화면에서는 카드를 세로로 쌓고, 화면이 넓어지면 가로로 나란히 놓는 식이다. 작은 화면을 기준으로 먼저 만들고 큰 화면에서 배치를 넓혀 가는 방식을 **모바일 퍼스트(mobile-first)**라 한다. Tailwind CSS는 이런 규칙을 간단히 표현할 수 있어서, 요청만 하면 AI가 알맞게 적용해 준다. 다만 "반응형", "모바일 퍼스트", "그리드" 같은 개념을 알아야 이런 요청을 할 수 있다.
 
 ## 8.6 정리
 
 - **랜딩 페이지는 웹 사이트의 첫인상을 결정하는 중요한 페이지**
-  - Header(Navbar) + Hero Section + Features + Footer 구조
+  - Header(Navbar) + Hero Section + Body + Footer 구조
   - 몇 초 안에 사이트의 목적을 전달해야 한다
 - **UI 컴포넌트의 명칭과 역할을 이해하면 AI에게 더 정확한 지시가 가능**
   - Navbar, Hero, Card, Carousel, Button, Badge, Footer, Modal, Tooltip 등
   - "메뉴 바"보다 "Navbar", "슬라이드"보다 "Carousel"이 정확한 결과를 낸다
 - **이미지 생성 AI로 디자인 목업을 만들고, Claude Code로 구현**
   - 프롬프트에 컴포넌트 명칭을 사용하여 구체적으로 요청
-  - Claude Code의 design 스킬로 이미지 기반 코드 생성 가능
+  - Claude Code에 목업 이미지를 붙여넣어 코드 생성, frontend-design 플러그인을 설치하면 디자인 완성도 향상
 - **SvelteKit에서는 컴포넌트를 분리하여 레이아웃에 조립하는 방식으로 구현**
-  - `+layout.svelte`로 공통 Header/Footer 관리
-  - `$lib/components/`에 재사용 가능한 컴포넌트 분리
-  - Tailwind CSS의 반응형 접두사(`md:`, `lg:`)로 다양한 화면 크기 대응
+  - 공통 레이아웃(`+layout.svelte`)에서 Header/Footer를 한 번만 관리
+  - `src/lib/components/`에 재사용 가능한 컴포넌트를 분리하고, 내용만 바꿔 끼워 쓰기
+  - "모바일에서는 1열, 데스크톱에서는 3열"처럼 반응형 배치를 말로 요청

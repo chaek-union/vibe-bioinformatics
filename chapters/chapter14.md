@@ -4,15 +4,15 @@
 
 전통적인 과학 연구는 **가설 → 실험 → 데이터 수집 → 검증**의 순서를 따랐다. 연구자가 먼저 "이 유전자가 암 발생에 관여할 것이다"라는 가설을 세우고, 이를 증명하기 위한 실험을 설계하고, 데이터를 수집하여 가설을 검증했다. 그러나 대규모 오믹스(omics) 데이터가 보편화되면서 과학적 발견의 방식 자체가 바뀌고 있다. van Helden(2013)은 *EMBO Reports*에서 전통적인 가설 주도 연구가 연구자의 편향을 내포할 수밖에 없다고 지적했다. 연구자가 먼저 위험 인자를 "예측하거나 추측"해야 하기 때문이다. 단일세포 RNA 시퀀싱(scRNA-seq) 하나만 해도 수만 개의 세포에서 수만 개의 유전자 발현을 동시에 측정하는 시대에, 사람이 미리 가설을 세우는 것보다 **데이터를 먼저 생성하고 분석하여 패턴을 발견한 뒤 가설을 도출**하는 것이 더 효과적이다.
 
-여기에 AI가 결합되면서 이 변화는 한 단계 더 나아간다. 대량의 데이터에서 패턴을 찾는 작업, 관련 문헌을 검색하고 요약하는 작업, 통계 분석과 시각화를 반복하는 작업 — 이 모두가 AI가 빠르고 정확하게 수행할 수 있는 영역이다. 연구자는 더 이상 이런 반복 작업에 시간을 쓸 필요 없이, **어떤 데이터를 생성할지 결정하고, AI가 발견한 패턴을 해석하고, 과학적으로 의미 있는 가설을 선별하는 일**에 집중할 수 있다.
+여기에 AI가 결합되면서 이 변화는 한 단계 더 나아간다. 대량의 데이터에서 패턴을 찾는 작업, 관련 문헌을 검색하고 요약하는 작업, 통계 분석과 시각화를 반복하는 작업은 모두 AI가 빠르고 정확하게 수행할 수 있는 영역이다. 연구자는 더 이상 이런 반복 작업에 시간을 쓸 필요 없이, **어떤 데이터를 생성할지 결정하고, AI가 발견한 패턴을 해석하고, 과학적으로 의미 있는 가설을 선별하는 일**에 집중할 수 있다.
 
 | | 전통적 과학 | AI 시대의 데이터 중심 과학 |
 |---|---|---|
 | **순서** | 가설 → 실험 → 데이터 → 검증 | 데이터 생성 → AI 패턴 발견 → 가설 도출 → 검증 |
 | **연구자 역할** | 가설을 세우고 실험을 직접 수행 | 데이터 생성을 결정하고, AI 분석 결과를 판단 |
 | **데이터 규모** | 특정 유전자 몇 개 | 전체 유전체/전사체 |
-| **분석 수행** | 연구자가 직접 코딩·통계 처리 | AI 팀원이 분석, 연구자가 해석 |
-| **문헌 조사** | 연구자가 논문을 직접 검색·정리 | AI가 검색·요약, 연구자가 선별 |
+| **분석 수행** | 연구자가 직접 코딩/통계 처리 | AI 팀원이 분석, 연구자가 해석 |
+| **문헌 조사** | 연구자가 논문을 직접 검색/정리 | AI가 검색/요약, 연구자가 선별 |
 
 이 패러다임에서 연구자의 역할은 실험을 직접 수행하는 사람에서 **연구팀을 이끄는 팀장(오케스트레이터)**으로 변화한다. 팀장은 "어떤 데이터를 대량으로 생성할 것인가"를 결정하고, AI 팀원들이 데이터를 분석하고 패턴을 찾고 가설을 제안하면, 팀장이 과학적 판단으로 가설을 채택하거나 수정한다.
 
@@ -38,7 +38,7 @@
 
 | 팀원 | 역할 | 사용하는 도구/MCP |
 |------|------|-----------------|
-| **Literature Scout** | 문헌 검색, 최신 동향 파악, 관련 논문 요약 | bioRxiv, PubMed, fetch |
+| **Literature Scout** | 문헌 검색, 최신 동향 파악, 관련 논문 요약 | PubMed MCP, 내장 웹 검색 |
 | **Data Analyst** | 데이터 전처리, QC, 클러스터링, 통계 분석, 시각화 | Scanpy, Python |
 | **Hypothesis Generator** | 분석 결과에서 패턴을 찾아 가설을 제안 | (분석 결과 + 문헌 참조) |
 | **Pathway Analyst** | GO enrichment, KEGG pathway, 네트워크 분석 | KEGG MCP |
@@ -49,11 +49,11 @@
 
 Claude Code에게 팀원 에이전트를 만들도록 요청한다:
 
-> .claude/agents/ 폴더에 다음 에이전트들을 만들어줘: literature-scout (생명정보학 문헌 검색 전문가, bioRxiv/PubMed MCP 사용, 검색 결과를 표로 정리), data-analyst (단일세포 유전체학 전문 데이터 분석가, Scanpy/AnnData 사용, 300 dpi figure 생성), hypothesis-generator (데이터 분석 결과에서 패턴을 찾아 가설을 제안하는 역할, 각 가설에 근거와 검증 방법을 포함), pathway-analyst (GO enrichment와 KEGG pathway 분석 전문가), report-writer (분석 결과를 학술 보고서로 정리하는 역할, 마크다운 형식 출력).
+> .claude/agents/ 폴더에 다음 에이전트들을 만들어줘: literature-scout (생명정보학 문헌 검색 전문가, PubMed MCP와 내장 웹 검색 사용, 검색 결과를 표로 정리), data-analyst (단일세포 유전체학 전문 데이터 분석가, Scanpy/AnnData 사용, 300 dpi figure 생성), hypothesis-generator (데이터 분석 결과에서 패턴을 찾아 가설을 제안하는 역할, 각 가설에 근거와 검증 방법을 포함), pathway-analyst (GO enrichment와 KEGG pathway 분석 전문가), report-writer (분석 결과를 학술 보고서로 정리하는 역할, 마크다운 형식 출력).
 
-이 프롬프트 하나로 다섯 개의 에이전트 파일이 생성된다. 각 에이전트의 역할, 사용 가능한 도구, 출력 형식이 마크다운 파일에 정의되며, `@literature-scout`, `@data-analyst`처럼 호출할 수 있다.
+이 프롬프트 하나로 다섯 개의 에이전트 파일이 생성된다. 각 에이전트의 역할, 사용 가능한 도구, 출력 형식이 마크다운 파일(12.5에서 본 YAML 머리말 형식)에 정의되며, `@agent-literature-scout`, `@agent-data-analyst`처럼 호출하거나 `@`를 입력해 나타나는 목록에서 고를 수 있다.
 
-![AI 연구팀 구성도 — 연구자(팀장)와 각 AI 팀원의 역할](../assets/ch14-02-ai-research-team.png)
+![AI 연구팀 구성도: 연구자(팀장)와 각 AI 팀원의 역할](../assets/ch14-02-ai-research-team.png)
 
 ## 14.3 프로젝트 환경 구축
 
@@ -83,28 +83,33 @@ Docker 환경이 준비되면 분석을 컨테이너 안에서 실행할 수 있
 
 > 이 프로젝트의 CLAUDE.md를 작성해줘. 연구 주제는 비소세포폐암(NSCLC) 종양 미세환경의 면역세포 구성 분석이야. 10x Genomics scRNA-seq 데이터를 사용하고, Scanpy와 AnnData로 분석해. 분석 파이프라인은 QC → 정규화 → 배치 보정 → 클러스터링 → 세포 유형 주석 → 차등 발현 분석 순서야. figure는 300 dpi로 저장하고, 결과 파일은 h5ad 형식으로 저장해.
 
-CLAUDE.md는 사용자가 직접 작성하는 명시적 메모리다. 이와 별도로, Claude Code는 작업 중 발견한 패턴이나 프로젝트 특성을 MEMORY.md에 자동으로 기록한다. 예를 들어 분석 과정에서 "이 데이터셋은 배치 효과가 크다"는 사실을 발견하면 MEMORY.md에 남기고, 다음 대화에서 자동으로 참조한다. 사용자가 별도로 관리할 필요 없다.
+CLAUDE.md는 사용자가 직접 작성하는 명시적 메모리다. 이와 별도로, Claude Code는 사용자의 선호, 사용자가 바로잡아 준 내용, 코드만 봐서는 알 수 없는 프로젝트 맥락을 자동 메모리(MEMORY.md)에 기록한다. 예를 들어 분석 과정에서 "이 데이터셋은 배치 효과가 크다"는 사실을 알려주면 이를 메모리에 남기고, 다음 대화에서 자동으로 참조한다. 자동 메모리는 프로젝트 폴더가 아니라 `~/.claude/projects/<프로젝트>/memory/`에 저장되므로 Git으로 공유되지 않는다. 팀 전체가 알아야 할 내용은 CLAUDE.md에 적고, 자동 메모리에 기록된 내용은 `/memory` 명령으로 확인하거나 고칠 수 있다.
 
 ### MCP 서버 연결
 
-11장에서 배운 MCP 서버를 프로젝트에 연결한다:
+11장에서 PubMed MCP 서버를 전역(user scope)으로 설치했다면 이 프로젝트에서도 바로 사용할 수 있다. 먼저 등록된 서버를 확인한다:
 
 ```bash
-claude mcp add --transport http --scope user biorxiv https://mcp.deepsense.ai/biorxiv/mcp
+claude mcp list
+```
+
+목록에 `pubmed`가 없다면 등록한다:
+
+```bash
 claude mcp add --transport http --scope user pubmed https://pubmed.mcp.claude.com/mcp
 ```
 
-12장에서 만든 KEGG MCP 서버가 있다면 함께 등록한다:
+12장에서 만든 KEGG MCP 서버가 있다면 `kegg_mcp.py`를 프로젝트 폴더에 복사한 뒤 project scope로 함께 등록한다. 설정은 프로젝트 루트의 `.mcp.json`에 기록된다:
 
 ```bash
-claude mcp add --scope project kegg -- uv run kegg_mcp.py
+claude mcp add --scope project kegg -- uv run --with "mcp>=2,<3" kegg_mcp.py
 ```
 
-MCP 서버를 추가한 뒤에는 **Claude Code를 재시작**해야 새 MCP 서버가 인식된다. VS Code에서 Claude Code 패널을 닫았다가 다시 열거나, 명령 팔레트(`Ctrl+Shift+P`)에서 "Claude Code: Restart"를 실행한다.
+MCP 서버를 추가한 뒤에는 **새 대화를 시작**해야 새 MCP 서버가 인식된다. 새 대화에서 `/mcp`를 입력하여 서버가 **Connected**로 표시되는지 확인하고, 연결되지 않았다면 같은 화면에서 다시 연결(Reconnect)한다. 그래도 인식되지 않으면 명령 팔레트(`Ctrl+Shift+P`)에서 "Developer: Reload Window"를 실행하여 VS Code 창을 다시 불러온다.
 
 ### 알림 시스템 설정
 
-AI 팀원이 응답을 마칠 때마다 Discord 채널에 자동으로 보고하도록 설정한다. Claude Code의 **Stop Hook**을 활용하면, 프롬프트에 별도로 요청하지 않아도 모든 응답이 끝날 때마다 알림이 전송된다.
+AI 팀원이 작업을 마칠 때마다 Discord 채널에 자동으로 보고하도록 설정한다. Claude Code의 **Stop Hook**(메인 Claude가 응답을 마칠 때)과 **SubagentStop Hook**(서브에이전트가 작업을 마칠 때)을 활용하면, 프롬프트에 별도로 요청하지 않아도 작업이 끝날 때마다 알림이 전송된다.
 
 먼저 Discord Webhook을 설정한다:
 
@@ -113,13 +118,13 @@ AI 팀원이 응답을 마칠 때마다 Discord 채널에 자동으로 보고하
 3. **새 웹후크**를 클릭하고 이름을 설정한다 (예: `NSCLC Analysis Bot`).
 4. **웹후크 URL 복사**를 클릭한다.
 
-복사한 URL을 프로젝트의 `.env` 파일에 저장한다:
+복사한 URL을 프로젝트의 `.env` 파일에 저장한다. 프로젝트 루트에 빈 `.env` 파일을 만든다:
 
 ```bash
-cp .env.example .env
+touch .env
 ```
 
-`.env` 파일을 열고 복사한 URL을 붙여넣는다:
+`.env` 파일을 열고 복사한 URL을 다음과 같이 붙여넣는다:
 
 ```
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
@@ -129,11 +134,11 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
 
 다음으로 알림 스크립트를 만들어달라고 요청한다:
 
-> .claude/hooks/notify.sh를 만들어줘. stdin으로 JSON을 받아서 last_assistant_message 필드의 첫 200자를 추출하고, .env의 DISCORD_WEBHOOK_URL로 전송해. jq와 curl을 사용해줘.
+> .claude/hooks/notify.sh를 만들어줘. stdin으로 JSON을 받아서 last_assistant_message 필드의 첫 200자를 추출하고, agent_type 필드가 있으면 앞에 [agent_type]을 붙여서 .env의 DISCORD_WEBHOOK_URL로 전송해. .env는 스크립트 위치가 아니라 CLAUDE_PROJECT_DIR 환경 변수가 가리키는 프로젝트 루트에서 읽어줘. jq와 curl을 사용해줘.
 
-그리고 `.claude/settings.json`에 Stop Hook을 등록한다:
+그리고 `.claude/settings.json`에 Stop Hook과 SubagentStop Hook을 등록한다:
 
-> .claude/settings.json에 Stop Hook을 추가해줘. Claude가 응답을 마칠 때마다 .claude/hooks/notify.sh가 실행되도록 설정해줘.
+> .claude/settings.json에 Stop Hook과 SubagentStop Hook을 추가해줘. Claude나 서브에이전트가 작업을 마칠 때마다 .claude/hooks/notify.sh가 실행되도록 설정하고, 경로는 ${CLAUDE_PROJECT_DIR}를 기준으로 적어줘.
 
 설정 결과는 다음과 같다:
 
@@ -145,7 +150,17 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/notify.sh"
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/notify.sh\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/notify.sh\""
           }
         ]
       }
@@ -154,18 +169,30 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1234567890/abcdefg...
 }
 ```
 
-Stop Hook은 Claude가 응답을 마칠 때마다 자동으로 실행되며, stdin으로 다음과 같은 JSON을 받는다:
+`${CLAUDE_PROJECT_DIR}`는 프로젝트 루트 경로로 바뀐다. 작업 중에 현재 디렉토리가 바뀌어도 스크립트를 찾을 수 있도록 상대 경로 대신 이 변수를 쓴다.
+
+Stop Hook은 메인 Claude가 응답을 마칠 때마다 자동으로 실행되며, stdin으로 다음과 같은 JSON을 받는다(일부 필드만 표시):
 
 ```json
 {
   "hook_event_name": "Stop",
-  "last_assistant_message": "QC 완료 — 총 45,231개 세포 중 38,567개 통과..."
+  "last_assistant_message": "QC와 문헌 조사가 모두 끝났습니다. 총 45,231개 세포 중 38,567개가 통과했고..."
 }
 ```
 
-`notify.sh`는 `last_assistant_message`에서 핵심 내용을 추출하여 Discord에 전송한다. 이렇게 설정하면 프롬프트에 알림을 요청할 필요 없이, 모든 작업에서 자동으로 Discord 알림이 전송된다.
+SubagentStop Hook은 `@agent-data-analyst` 같은 서브에이전트가 작업을 마칠 때 실행되며, 어떤 에이전트인지 알려주는 `agent_type` 필드가 함께 들어온다:
 
-![알림 시스템 구조 — Claude Code Hook이 분석 진행 상황을 Discord/Slack 채널에 전송하는 흐름](../assets/ch14-03-notification-system.png)
+```json
+{
+  "hook_event_name": "SubagentStop",
+  "agent_type": "data-analyst",
+  "last_assistant_message": "QC 완료: 총 45,231개 세포 중 38,567개 통과..."
+}
+```
+
+`notify.sh`는 `last_assistant_message`의 앞부분을 잘라 Discord에 전송하고, 서브에이전트의 알림에는 `[data-analyst]`처럼 에이전트 이름을 붙인다. 이렇게 설정하면 프롬프트에 알림을 요청할 필요 없이, 모든 작업에서 자동으로 Discord 알림이 전송된다.
+
+![알림 시스템 구조: Claude Code Hook이 분석 진행 상황을 Discord/Slack 채널에 전송하는 흐름](../assets/ch14-03-notification-system.png)
 
 ## 14.4 실전 예제: 폐암 단일세포 전사체 분석
 
@@ -175,7 +202,7 @@ Stop Hook은 Claude가 응답을 마칠 때마다 자동으로 실행되며, std
 
 연구자가 결정해야 하는 가장 중요한 사항은 **어떤 데이터를 분석할 것인가**이다. 데이터의 선택이 연구의 방향을 결정한다.
 
-> @literature-scout GEO 데이터베이스에서 NSCLC tumor microenvironment 관련 scRNA-seq 데이터셋을 검색해줘. 10x Genomics 플랫폼을 사용하고, 환자 수가 10명 이상인 데이터셋을 찾아줘. 각 데이터셋의 샘플 수, 세포 수, 논문 정보를 표로 정리해줘.
+> @agent-literature-scout GEO 데이터베이스에서 NSCLC tumor microenvironment 관련 scRNA-seq 데이터셋을 검색해줘. 10x Genomics 플랫폼을 사용하고, 환자 수가 10명 이상인 데이터셋을 찾아줘. 각 데이터셋의 샘플 수, 세포 수, 논문 정보를 표로 정리해줘.
 
 Literature Scout이 후보 데이터셋을 정리하면, 연구자가 검토하여 하나를 선택한다. 여기서는 GSE154826을 선택했다고 가정한다. 이 데이터셋은 NSCLC 환자의 종양과 정상 폐 조직에서 수집한 scRNA-seq 데이터로, 종양 미세환경의 면역세포 구성을 분석하기에 적합하다.
 
@@ -185,21 +212,23 @@ Literature Scout이 후보 데이터셋을 정리하면, 연구자가 검토하�
 
 데이터가 준비되면 AI 팀원들이 **동시에** 작업을 시작한다. Data Analyst는 데이터를 분석하고, Literature Scout은 관련 문헌을 조사한다. 하나의 프롬프트에 두 에이전트를 동시에 호출하면 Claude Code가 서브에이전트를 병렬로 실행한다.
 
-> @data-analyst Docker 컨테이너 안에서 data/ 디렉토리의 scRNA-seq 데이터를 분석해줘. QC (미토콘드리아 유전자 비율, 유전자 수, UMI 수 기준 필터링), 정규화 (scran), 고변동 유전자 선택, PCA, UMAP, Leiden 클러스터링을 수행해줘. 각 단계의 QC 그래프를 figures/ 에 저장하고, 결과를 results/preprocessed.h5ad로 저장해줘. 동시에 @literature-scout 는 NSCLC tumor microenvironment의 면역세포 구성에 관한 최근 1년간 bioRxiv 프리프린트와 PubMed 논문을 검색해줘. 특히 T세포 하위 집단 분류 기준과 마커 유전자 목록을 정리해줘. 결과를 references/literature-review.md에 저장하고, 인용 논문 목록을 references/references.bib에 BibTeX 형식으로 내보내줘.
+> @agent-data-analyst Docker 컨테이너 안에서 data/ 디렉토리의 scRNA-seq 데이터를 분석해줘. QC (미토콘드리아 유전자 비율, 유전자 수, UMI 수 기준 필터링), 정규화 (scran), 고변동 유전자 선택, PCA, UMAP, Leiden 클러스터링을 수행해줘. 각 단계의 QC 그래프를 figures/ 에 저장하고, 결과를 results/preprocessed.h5ad로 저장해줘. 동시에 @agent-literature-scout 는 NSCLC tumor microenvironment의 면역세포 구성에 관한 최근 1년간 PubMed 논문을 검색해줘. 특히 T세포 하위 집단 분류 기준과 마커 유전자 목록을 정리해줘. 결과를 references/literature-review.md에 저장하고, 인용 논문 목록을 references/references.bib에 BibTeX 형식으로 내보내줘.
 
-Stop Hook이 설정되어 있으므로, 각 에이전트가 작업을 마칠 때마다 자동으로 Discord에 알림이 전송된다:
+SubagentStop Hook과 Stop Hook이 설정되어 있으므로, 각 에이전트가 작업을 마칠 때와 Claude가 전체 응답을 마칠 때 자동으로 Discord에 알림이 전송된다. 알림 내용은 각 에이전트가 마지막에 남긴 메시지의 앞부분(최대 200자)이므로, 실제 문구는 매번 다르다:
 
 ```
-📊 [Data Analyst] QC 완료 — 총 45,231개 세포 중 38,567개 통과 (85.3%)
-📊 [Data Analyst] 클러스터링 완료 — 18개 클러스터 발견
-📚 [Literature Scout] 문헌 조사 완료 — 관련 논문 23편 정리
+[data-analyst] QC 완료: 총 45,231개 세포 중 38,567개 통과 (85.3%). Leiden 클러스터링 결과 18개 클러스터를 찾았고, results/preprocessed.h5ad에 저장했습니다...
+[literature-scout] 문헌 조사 완료: 관련 논문 23편을 references/literature-review.md에 정리했습니다...
+두 작업이 모두 끝났습니다. Data Analyst는 18개 클러스터를 찾았고, Literature Scout는 논문 23편을 정리했습니다...
 ```
+
+마지막 줄처럼 에이전트 이름이 없는 알림은 메인 Claude의 응답이 끝날 때 Stop Hook이 보낸 것이다.
 
 ### Phase 3: 가설 도출
 
 클러스터링 결과와 문헌 조사가 완료되면, Hypothesis Generator가 데이터에서 발견된 패턴과 문헌 정보를 종합하여 가설을 제안한다.
 
-> @hypothesis-generator results/preprocessed.h5ad의 클러스터링 결과와 references/literature-review.md의 문헌 정보를 종합해줘. 각 클러스터의 마커 유전자를 분석하여 세포 유형을 추정하고, 기존 문헌에서 보고되지 않은 흥미로운 패턴이 있는지 찾아줘. 발견된 패턴마다 검증 가능한 가설을 제안하고, 각 가설에 대해 근거, 검증 방법, 예상 결과를 정리해줘.
+> @agent-hypothesis-generator results/preprocessed.h5ad의 클러스터링 결과와 references/literature-review.md의 문헌 정보를 종합해줘. 각 클러스터의 마커 유전자를 분석하여 세포 유형을 추정하고, 기존 문헌에서 보고되지 않은 흥미로운 패턴이 있는지 찾아줘. 발견된 패턴마다 검증 가능한 가설을 제안하고, 각 가설에 대해 근거, 검증 방법, 예상 결과를 정리해줘.
 
 Hypothesis Generator가 제안하는 가설의 예:
 
@@ -230,26 +259,26 @@ Hypothesis Generator가 제안하는 가설의 예:
 
 채택된 가설을 검증하기 위한 분석을 수행한다. Phase 2와 마찬가지로, 하나의 프롬프트에 두 에이전트를 호출하여 병렬로 실행한다.
 
-> @data-analyst 채택된 가설을 검증해줘. CLAUDE.md의 핵심 가설 섹션을 참고해서 통계 분석과 시각화를 수행해줘. 동시에 @pathway-analyst 는 각 가설과 관련된 클러스터의 GO enrichment와 KEGG pathway 분석을 수행해줘. 결과를 results/pathway-analysis.md에 정리해줘.
+> @agent-data-analyst 채택된 가설을 검증해줘. CLAUDE.md의 핵심 가설 섹션을 참고해서 통계 분석과 시각화를 수행해줘. 동시에 @agent-pathway-analyst 는 각 가설과 관련된 클러스터의 GO enrichment와 KEGG pathway 분석을 수행해줘. 결과를 results/pathway-analysis.md에 정리해줘.
 
-Stop Hook에 의해 각 분석이 완료될 때마다 Discord에 알림이 전송된다:
+SubagentStop Hook에 의해 각 분석이 완료될 때마다 Discord에 알림이 전송된다:
 
 ```
-🔬 [Data Analyst] 가설 검증 완료 — 통계 분석 및 시각화 저장
-🧬 [Pathway Analyst] GO/KEGG enrichment 완료 — results/pathway-analysis.md 저장
+[data-analyst] 가설 검증 완료: 통계 분석 결과와 시각화를 results/, figures/에 저장했습니다...
+[pathway-analyst] GO/KEGG enrichment 완료: results/pathway-analysis.md에 정리했습니다...
 ```
 
 ### Phase 5: 결과 종합 및 논문 작성
 
 모든 분석이 완료되면, Report Writer가 결과를 종합한다.
 
-> @report-writer 지금까지의 분석 결과를 종합 보고서로 정리해줘. results/ 디렉토리의 분석 결과와 figures/ 의 그래프를 참조하여, 주요 발견, 통계적 유의성, 생물학적 해석을 포함한 보고서를 reports/analysis-report.md에 작성해줘.
+> @agent-report-writer 지금까지의 분석 결과를 종합 보고서로 정리해줘. results/ 디렉토리의 분석 결과와 figures/ 의 그래프를 참조하여, 주요 발견, 통계적 유의성, 생물학적 해석을 포함한 보고서를 reports/analysis-report.md에 작성해줘.
 
 ```
-📝 [Report Writer] 종합 보고서 작성 완료 — reports/analysis-report.md
+[report-writer] 종합 보고서 작성 완료: reports/analysis-report.md에 저장했습니다...
 ```
 
-보고서가 완성되면, 연구자가 직접 과학 논문 작성 도우미(https://research.pnucolab.com/spwa)에서 논문 초안을 작성한다. 13장에서 배운 5단계 워크플로우에 따라, 연구자가 관점과 개요를 제공하고 AI가 영어 텍스트를 생성하는 역할 분담이다. 과학 논문 작성 도우미에 `references/references.bib`를 입력하면 인용 관리가 자동으로 처리되므로, AI가 정리한 `reports/analysis-report.md`를 참고하면서 IMRAD (Introduction, Methods, Results, Discussion) 형식으로 논문을 완성한다.
+보고서가 완성되면, 연구자가 직접 13장에서 소개한 Paper Writing Assistant(https://research.pnucolab.com/spwa)에서 논문 초안을 작성한다. 13장에서 배운 5단계 워크플로우에 따라, 연구자가 관점과 개요를 제공하고 AI가 영어 텍스트를 생성하는 역할 분담이다. Paper Writing Assistant에 `references/references.bib`를 입력하면 인용 관리가 자동으로 처리되므로, AI가 정리한 `reports/analysis-report.md`를 참고하면서 IMRAD (Introduction, Methods, Results, Discussion) 형식으로 논문을 완성한다.
 
 ## 14.5 알림 시스템 활용 팁
 
@@ -267,12 +296,12 @@ Discord 외에도 Slack이나 Zulip을 사용하는 연구팀이라면, `notify.
 
 ### 다른 Hook 이벤트 활용
 
-Stop Hook 외에도 다양한 Hook 이벤트를 활용할 수 있다. 예를 들어, `SubagentStop` Hook을 사용하면 서브에이전트가 작업을 마칠 때마다 알림을 받을 수 있다.
+14.3에서 설정한 Stop, SubagentStop Hook 외에도 다양한 Hook 이벤트를 활용할 수 있다. 다음은 알림에 쓸 만한 주요 이벤트 일부다.
 
 | Hook 이벤트 | 용도 |
 |------------|------|
 | `Stop` | Claude가 응답을 마칠 때마다 알림 |
-| `SubagentStop` | 서브에이전트(@data-analyst 등)가 완료될 때 알림 |
+| `SubagentStop` | 서브에이전트(@agent-data-analyst 등)가 완료될 때 알림 |
 | `Notification` | Claude Code가 권한 요청 등의 알림을 보낼 때 |
 | `PostToolUse` | 특정 도구 실행 후 알림 (예: 파일 저장 시) |
 
@@ -327,6 +356,6 @@ AI 기술은 빠르게 변하지만, 이 책에서 다룬 **도메인 지식의 
 - **AI 연구팀 구성**: `.claude/agents/`에 Literature Scout, Data Analyst, Hypothesis Generator, Pathway Analyst, Report Writer 등 역할별 에이전트 정의
 - **프로젝트 환경**: 디렉토리 구조, CLAUDE.md(장기기억), MCP 서버, 알림 Hook을 한 번에 구축
 - **알림 시스템**: Discord/Slack/Zulip Webhook으로 분석 진행 상황을 실시간 업데이트
-- **실전 워크플로우**: 데이터 준비 → 데이터 이해 → 가설 도출 → 가설 검증 → 결과 종합·논문 작성의 5단계
+- **실전 워크플로우**: 데이터 준비 → 데이터 이해 → 가설 도출 → 가설 검증 → 결과 종합/논문 작성의 5단계
 - **Human-in-the-Loop 체크포인트**: 데이터 선택, QC 기준, 가설 채택, 통계 해석, 인용 검증, 윤리 검토
 - **핵심 원칙**: AI 팀원이 아무리 유능해도, 과학적 판단과 최종 책임은 연구자에게 있다

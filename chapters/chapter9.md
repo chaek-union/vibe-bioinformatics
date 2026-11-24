@@ -104,19 +104,19 @@ Spinner와 Progress Bar는 사용자 경험(UX)에서 중요한 역할을 한다
 │  Navbar                      │
 ├──────────────────────────────┤
 │  Breadcrumb                  │
-│  페이지 제목 (Heading)         │
+│  페이지 제목 (Heading)       │
 ├──────────────────────────────┤
-│  입력 영역                    │
+│  입력 영역                   │
 │  ┌────────────────────────┐  │
-│  │  Textarea (시퀀스 입력)  │  │
+│  │ Textarea (시퀀스 입력) │  │
 │  └────────────────────────┘  │
-│  [분석 시작] 버튼              │
+│  [분석 시작] 버튼            │
 ├──────────────────────────────┤
-│  결과 영역                    │
+│  결과 영역                   │
 │  ┌────────────────────────┐  │
-│  │  결과 출력 (Table/Code) │  │
+│  │ 결과 출력 (Table/Code) │  │
 │  └────────────────────────┘  │
-│  [다운로드] 버튼               │
+│  [다운로드] 버튼             │
 ├──────────────────────────────┤
 │  Footer                      │
 └──────────────────────────────┘
@@ -133,16 +133,16 @@ Spinner와 Progress Bar는 사용자 경험(UX)에서 중요한 역할을 한다
 ```
 ┌──────────────────────────────────┐
 │  Navbar                          │
-├──────┬───────────────────────────┤
-│      │  Breadcrumb               │
-│ Side │  페이지 제목               │
-│ bar  ├───────────────────────────┤
-│      │                           │
-│ 도구1 │  선택된 도구의              │
-│ 도구2 │  입력/결과 영역             │
-│ 도구3 │                           │
-│      │                           │
-├──────┴───────────────────────────┤
+├───────┬──────────────────────────┤
+│       │  Breadcrumb              │
+│ Side  │  페이지 제목             │
+│ bar   ├──────────────────────────┤
+│       │                          │
+│ 도구1 │  선택된 도구의           │
+│ 도구2 │  입력/결과 영역          │
+│ 도구3 │                          │
+│       │                          │
+├───────┴──────────────────────────┤
 │  Footer                          │
 └──────────────────────────────────┘
 ```
@@ -184,81 +184,18 @@ src/routes/
 
 ### Reverse Complement 예시
 
-다음은 Reverse Complement 도구 페이지의 코드이다. 이 코드를 직접 작성하기보다, 이런 구조를 이해하고 AI에게 요청하는 것이 이 책의 접근법이다.
+Reverse Complement 도구 페이지를 예로 들어 보자. 이 페이지가 하는 일은 다음과 같다.
 
-```svelte
-<!-- src/routes/tools/revcomp/+page.svelte -->
-<script>
-  let inputSequence = '';
-  let result = '';
+1. 사용자가 Textarea에 FASTA 형식의 DNA 서열을 붙여넣는다
+2. `>`로 시작하는 헤더 줄을 제거하고, 나머지 줄을 이어 붙여 순수한 서열만 남긴다. 입력하는 동안 서열 길이가 실시간으로 표시된다
+3. "분석 시작" Button을 누르면 서열을 뒤집고 각 염기를 상보 염기(A↔T, G↔C)로 바꾼 역상보 서열을 계산한다
+4. 결과를 Code Block으로 보여 주고, "결과 복사" 버튼으로 복사할 수 있게 한다
 
-  function reverseComplement(seq) {
-    const complement = { A: 'T', T: 'A', G: 'C', C: 'G' };
-    return seq
-      .toUpperCase()
-      .split('')
-      .reverse()
-      .map(base => complement[base] || base)
-      .join('');
-  }
+이 흐름을 그대로 요청하면 된다:
 
-  function handleSubmit() {
-    // FASTA 헤더 제거 후 시퀀스만 추출
-    const lines = inputSequence.split('\n');
-    const seq = lines.filter(l => !l.startsWith('>')).join('');
-    result = reverseComplement(seq);
-  }
-</script>
+> /tools/revcomp 페이지를 만들어줘. Breadcrumb(Home > Tools > Reverse Complement)과 제목을 넣고, Textarea에 FASTA를 입력받아 헤더 줄을 제거한 뒤 서열 길이를 실시간으로 보여줘. "분석 시작" 버튼을 누르면 역상보 서열을 계산해서 Code Block으로 보여주고, 결과 복사 버튼도 넣어줘
 
-<div class="max-w-4xl mx-auto p-6">
-  <nav class="text-sm text-gray-500 mb-4">
-    <a href="/" class="hover:underline">Home</a> &gt;
-    <a href="/tools" class="hover:underline">Tools</a> &gt;
-    <span>Reverse Complement</span>
-  </nav>
-
-  <h1 class="text-3xl font-bold mb-6">Reverse Complement</h1>
-
-  <div class="space-y-4">
-    <label class="block">
-      <span class="text-lg font-medium">Input Sequence (FASTA)</span>
-      <textarea
-        bind:value={inputSequence}
-        class="mt-2 w-full h-40 p-3 border rounded-lg font-mono"
-        placeholder=">sequence1&#10;ATCGATCG"
-      ></textarea>
-    </label>
-
-    <button
-      on:click={handleSubmit}
-      class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-    >
-      분석 시작
-    </button>
-
-    {#if result}
-      <div class="mt-6">
-        <h2 class="text-xl font-semibold mb-2">결과</h2>
-        <pre class="bg-gray-100 p-4 rounded-lg font-mono overflow-x-auto">{result}</pre>
-        <button
-          on:click={() => navigator.clipboard.writeText(result)}
-          class="mt-2 text-blue-600 hover:underline"
-        >
-          결과 복사
-        </button>
-      </div>
-    {/if}
-  </div>
-</div>
-```
-
-이 코드에서 주목할 점은 다음과 같다:
-
-- **`bind:value`**: Svelte의 양방향 바인딩이다. 사용자가 Textarea에 입력하면 `inputSequence` 변수가 자동으로 업데이트되고, 반대로 코드에서 변수를 바꾸면 화면도 자동으로 갱신된다.
-- **`{#if result}`**: Svelte의 조건부 렌더링이다. `result` 변수에 값이 있을 때만 결과 영역을 표시한다. 분석 시작 버튼을 누르기 전에는 결과 영역이 보이지 않는다.
-- **FASTA 파싱**: `>`로 시작하는 줄은 헤더이므로 제거하고, 나머지 줄을 합쳐서 순수 시퀀스만 추출한다. 이것은 생명정보학 도메인 지식이다.
-
-이 코드를 처음부터 작성할 수는 없더라도, "Textarea에 FASTA를 입력받고, 헤더를 제거한 뒤 역상보 서열을 계산해서 Code Block으로 보여주는 페이지를 만들어줘"라고 요청할 수 있어야 한다. 그러려면 FASTA 형식, 역상보 서열, Textarea, Code Block의 개념을 알아야 한다.
+여기서 사용자가 알아야 하는 것은 코드가 아니라 **FASTA 형식, 역상보 서열, Textarea, Code Block** 같은 개념이다. FASTA의 헤더 줄을 왜 제거해야 하는지, 역상보 서열이 무엇인지는 생명정보학 도메인 지식이고, Textarea와 Code Block은 9.3절에서 살펴본 UI 컴포넌트 이름이다. 이 개념들을 알면 AI에게 정확히 요청할 수 있고, 만들어진 페이지가 올바르게 동작하는지도 직접 확인할 수 있다. 예를 들어 `ATGC`를 넣었을 때 `GCAT`가 나오는지 확인해 보면 된다.
 
 ## 9.6 AI를 활용한 일반 페이지 디자인
 
@@ -292,5 +229,6 @@ Claude Code에서는 디자인 목업 이미지를 참조하여 구현을 요청
 - **SvelteKit의 파일 기반 라우팅으로 페이지를 구성**
   - 폴더 구조 = URL 구조
   - 중첩 레이아웃으로 공통 Sidebar 등을 관리
+  - 페이지가 할 일(입력, 처리, 결과 표시)을 순서대로 말로 요청
 - **AI에게 컴포넌트 명칭을 정확히 사용하여 디자인 및 구현을 요청**
   - "입력 칸"보다 "Textarea", "로딩 표시"보다 "Spinner"가 정확한 결과를 낸다

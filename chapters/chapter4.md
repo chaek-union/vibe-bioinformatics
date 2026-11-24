@@ -2,7 +2,7 @@
 
 ## 4.1 왜 Python인가?
 
-생명정보학에서 Python은 사실상 표준 프로그래밍 언어다. 데이터 처리, 시각화, 통계 분석, 머신러닝까지 거의 모든 작업을 Python 생태계 안에서 수행할 수 있다. Scanpy(단일세포 분석), Biopython(서열 처리), PyMOL(분자 시각화) 등 생명정보학 전용 라이브러리도 대부분 Python으로 작성되어 있다.
+생명정보학에서 Python은 사실상 표준 프로그래밍 언어다. 데이터 처리, 시각화, 통계 분석, 머신러닝까지 거의 모든 작업을 Python 생태계 안에서 수행할 수 있다. Scanpy(단일세포 분석), Biopython(서열 처리), PyMOL(분자 시각화) 등 생명정보학 전용 도구도 대부분 Python에서 사용할 수 있다.
 
 바이브 코딩에서는 이 패키지들의 문법을 암기할 필요가 없다. 대신 **각 패키지가 무엇을 할 수 있는지**를 알고, AI에게 정확히 요청하는 것이 중요하다. 이 장에서는 데이터 분석에 사용되는 핵심 패키지들의 역할과 주요 개념을 소개한다.
 
@@ -18,7 +18,7 @@ mkdir python-data-analysis
 
 VS Code에서 **파일 → 폴더 열기**로 `python-data-analysis` 디렉토리를 연다. 새 창이 열리면, 3장에서 배운 Docker를 활용하여 분석 환경을 구성한다. Claude Code에게 다음과 같이 요청한다:
 
-> Python 데이터 분석용 Docker 환경을 만들어줘. pandas, numpy, matplotlib, seaborn, scipy를 포함하고, Jupyter Notebook도 사용할 수 있게 해줘. compose.yml과 Dockerfile을 만들어줘.
+> Python 데이터 분석용 Docker 환경을 만들어줘. pandas, numpy, matplotlib, seaborn, scipy를 포함하고, Jupyter Notebook도 사용할 수 있게 해줘. 그래프에 한글이 깨지지 않도록 한글 글꼴(fonts-nanum)도 설치해줘. compose.yml과 Dockerfile을 만들어줘.
 
 Claude Code가 Dockerfile과 compose.yml을 생성하여, 필요한 패키지가 모두 설치된 컨테이너 환경을 구성해 준다. Docker를 사용하면 "내 컴퓨터에서는 되는데 다른 컴퓨터에서는 안 된다"는 문제를 방지할 수 있다.
 
@@ -32,7 +32,7 @@ Claude Code가 Dockerfile과 compose.yml을 생성하여, 필요한 패키지가
 | **Seaborn** | 통계 시각화 | 박스 플롯, 히트맵, 바이올린 플롯 |
 | **SciPy** | 과학 계산/통계 | t-test, 상관분석, 다중 검정 보정 |
 
-## 4.3 pandas — 테이블 데이터 처리
+## 4.3 pandas: 테이블 데이터 처리
 
 pandas는 표(테이블) 형태의 데이터를 다루는 패키지다. 엑셀 스프레드시트를 Python에서 다룬다고 생각하면 된다. 생명정보학에서는 유전자 발현 데이터, 변이 목록, 샘플 메타데이터 등 대부분의 데이터가 표 형태이므로 pandas는 거의 모든 분석의 출발점이 된다.
 
@@ -52,6 +52,7 @@ Claude Code에게 다음과 같이 요청한다:
 
 ```python
 import pandas as pd
+import numpy as np
 
 # CSV 파일 읽기
 df = pd.read_csv("gene_expression.csv")
@@ -81,7 +82,7 @@ df["neg_log_p"] = -np.log10(df["pvalue"])
 
 이 요청을 하려면 **pvalue, logFC가 무엇인지**, **필터링과 정렬이라는 개념**을 알아야 한다. 코드 문법은 몰라도 되지만, 데이터의 의미는 사람이 이해하고 있어야 한다.
 
-## 4.4 NumPy — 수치 연산
+## 4.4 NumPy: 수치 연산
 
 NumPy는 대규모 수치 데이터를 빠르게 처리하는 패키지다. pandas의 내부에서도 NumPy를 사용하며, Scanpy, Matplotlib 등 거의 모든 과학 계산 패키지가 NumPy 위에 구축되어 있다. Python 과학 생태계의 기반이라 할 수 있다.
 
@@ -113,14 +114,15 @@ arr.max()       # 최댓값
 log_values = np.log2(arr + 1)    # 모든 원소에 log2 적용
 
 # 난수 생성
-random_data = np.random.normal(0, 1, size=1000)  # 정규분포
+rng = np.random.default_rng(seed=42)              # 난수 생성기 (seed로 재현성 확보)
+random_data = rng.normal(0, 1, size=1000)         # 정규분포
 ```
 
 NumPy 자체를 직접 쓸 일은 많지 않지만, AI가 생성하는 코드에 자주 등장한다. `np.log2`, `np.mean` 같은 표현이 나왔을 때 무엇을 하는 코드인지 이해할 수 있으면 충분하다.
 
-## 4.5 Matplotlib — 기본 시각화
+## 4.5 Matplotlib: 기본 시각화
 
-Matplotlib은 Python의 가장 기본적인 시각화 패키지다. 1999년부터 개발되어 온 역사 깊은 패키지로, 거의 모든 종류의 그래프를 그릴 수 있다. 학술 논문에 실리는 그래프 대부분이 Matplotlib으로 만들어진다.
+Matplotlib은 Python의 가장 기본적인 시각화 패키지다. 2003년에 처음 공개된 역사 깊은 패키지로, 거의 모든 종류의 그래프를 그릴 수 있다. 학술 논문용 그래프를 만드는 데도 널리 쓰인다.
 
 ### 핵심 개념
 
@@ -146,7 +148,9 @@ plt.savefig("volcano.png", dpi=300)
 plt.show()
 ```
 
-![Matplotlib으로 그린 Volcano Plot 예시](../assets/ch4-02-matplotlib-volcano.png)
+![Matplotlib으로 그린 Volcano Plot 예시 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본, 2025)](../assets/ch4-02-matplotlib-volcano.png)
+
+그래프 제목이나 축 이름에 한글을 쓰려면 `plt.rcParams["font.family"] = "NanumGothic"`처럼 한글 글꼴을 먼저 지정해야 한다. Matplotlib의 기본 글꼴에는 한글이 없어서, 지정하지 않으면 한글이 네모(□)로 깨진다.
 
 Volcano plot은 차등 발현 분석(DEA)의 대표적인 시각화 방법이다. X축에 발현 변화량(logFC), Y축에 통계적 유의성(-log10 p-value)을 표시하여, 발현이 크게 변하면서 통계적으로 유의한 유전자를 한눈에 파악할 수 있다. 이름은 화산 분출 모양을 닮았다고 해서 붙여졌다.
 
@@ -165,15 +169,15 @@ plt.tight_layout()
 plt.savefig("combined.png", dpi=300)
 ```
 
-![Subplot으로 두 개의 그래프를 나란히 배치한 예시](../assets/ch4-03-matplotlib-subplot.png)
+![Subplot으로 두 개의 그래프를 나란히 배치한 예시 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본, 2025)](../assets/ch4-03-matplotlib-subplot.png)
 
-`dpi=300`은 해상도를 300 DPI(dots per inch)로 설정하는 것인데, 학술 논문 출판에 요구되는 기본 해상도이다. 화면에서는 차이가 크지 않지만, 인쇄물에서는 선명도에 큰 차이가 난다.
+`dpi=300`은 해상도를 300 DPI(dots per inch)로 설정하는 것인데, 많은 학술지가 요구하는 기본 해상도이다(선 그림은 600 DPI 이상을 요구하는 경우도 있으므로 투고 규정을 확인한다). 화면에서는 차이가 크지 않지만, 인쇄물에서는 선명도에 큰 차이가 난다.
 
 요청을 더 세밀하게 할수록 결과물이 정교해진다:
 
 > logFC와 -log10(pvalue)로 volcano plot 그려줘. significant한 유전자(pvalue < 0.05, |logFC| > 1)는 빨간색으로 표시하고, 나머지는 회색으로. 그래프 해상도는 300 dpi로 저장해줘
 
-## 4.6 Seaborn — 통계 시각화
+## 4.6 Seaborn: 통계 시각화
 
 Seaborn은 Matplotlib 위에 구축된 **통계 시각화 전문 패키지**다. 더 적은 코드로 보기 좋은 통계 그래프를 만들 수 있다. Matplotlib이 모든 것을 그릴 수 있는 범용 도구라면, Seaborn은 통계 시각화에 특화된 고수준 도구다.
 
@@ -195,33 +199,33 @@ Seaborn은 Matplotlib 위에 구축된 **통계 시각화 전문 패키지**다.
 ```python
 import seaborn as sns
 
-# 박스 플롯 — 그룹별 분포 비교
+# 박스 플롯: 그룹별 분포 비교
 sns.boxplot(data=df, x="cell_type", y="expression")
 plt.xticks(rotation=45)
 plt.show()
 ```
 
-![Seaborn 박스 플롯 예시 — 세포 유형별 유전자 발현량 분포](../assets/ch4-04-seaborn-boxplot.png)
+![Seaborn 박스 플롯 예시: 세포 유형별 유전자 발현량 분포 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본, 2025)](../assets/ch4-04-seaborn-boxplot.png)
 
 박스 플롯은 데이터의 분포를 요약하여 보여준다. 상자의 중앙선은 중앙값(median), 상자의 위아래는 사분위 범위(IQR), 수염(whisker)은 이상치를 제외한 범위를 나타낸다. 여러 그룹의 분포를 비교할 때 가장 많이 사용되는 시각화 방법이다.
 
 > 유전자 발현 매트릭스를 히트맵으로 시각화해줘. 빨강-파랑 색상표를 사용하고, 0을 중심으로 설정해줘
 
 ```python
-# 히트맵 — 유전자 발현 매트릭스 시각화
+# 히트맵: 유전자 발현 매트릭스 시각화
 sns.heatmap(expression_matrix, cmap="RdBu_r", center=0)
 plt.title("Gene Expression Heatmap")
 plt.show()
 ```
 
-![Seaborn 히트맵 예시 — 유전자 발현 매트릭스](../assets/ch4-05-seaborn-heatmap.png)
+![Seaborn 히트맵 예시: 유전자 발현 매트릭스 (자료: 10x Genomics PBMC 10k Multiome, figshare 전처리본, 2025)](../assets/ch4-05-seaborn-heatmap.png)
 
 히트맵은 행렬 형태의 데이터를 색상으로 표현한다. 유전자 발현 데이터에서 행은 유전자, 열은 샘플이고, 색상의 강도가 발현량을 나타낸다. `cmap="RdBu_r"`은 빨강-파랑 색상표를 사용하고, `center=0`은 발현 변화 없음(0)을 흰색으로 설정한다. 발현이 증가한 유전자는 빨간색, 감소한 유전자는 파란색으로 직관적으로 구분할 수 있다.
 
 > condition별 발현량 분포를 바이올린 플롯으로 그려줘
 
 ```python
-# 바이올린 플롯 — 분포의 형태까지 표현
+# 바이올린 플롯: 분포의 형태까지 표현
 sns.violinplot(data=df, x="condition", y="expression")
 plt.show()
 ```
@@ -238,7 +242,7 @@ plt.show()
 
 > cell_type별 gene expression의 분포를 violin plot으로 비교해줘. 색상은 pastel 팔레트 사용하고, 각 그룹의 데이터 포인트도 strip plot으로 겹쳐서 보여줘
 
-## 4.7 SciPy — 과학 계산과 통계 검정
+## 4.7 SciPy: 과학 계산과 통계 검정
 
 SciPy는 과학 계산에 필요한 다양한 알고리즘을 제공한다. 생명정보학에서는 주로 **통계 검정** 기능을 사용한다. 두 그룹 사이에 유의한 차이가 있는지, 두 변수 사이에 상관관계가 있는지를 통계적으로 판단할 때 SciPy의 함수들이 사용된다.
 
@@ -251,11 +255,11 @@ SciPy는 과학 계산에 필요한 다양한 알고리즘을 제공한다. 생�
 ```python
 from scipy import stats
 
-# t-test — 두 그룹의 평균 비교
+# t-test: 두 그룹의 평균 비교
 t_stat, p_value = stats.ttest_ind(group_a, group_b)
 print(f"t-statistic: {t_stat:.4f}, p-value: {p_value:.4e}")
 
-# Mann-Whitney U test — 비모수 검정 (정규분포 가정 불필요)
+# Mann-Whitney U test: 비모수 검정 (정규분포 가정 불필요)
 u_stat, p_value = stats.mannwhitneyu(group_a, group_b)
 
 # Pearson 상관계수
@@ -264,6 +268,7 @@ print(f"Correlation: {corr:.4f}, p-value: {p_value:.4e}")
 
 # 다중 검정 보정 (Benjamini-Hochberg)
 from scipy.stats import false_discovery_control
+# p_values: 여러 유전자에 대해 검정한 p-value 배열
 adjusted_pvalues = false_discovery_control(p_values, method='bh')
 ```
 

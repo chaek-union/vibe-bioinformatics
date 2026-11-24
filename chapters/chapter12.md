@@ -38,7 +38,7 @@ Sakana AI가 발표한 **"The AI Scientist"**는 이 개념을 한 단계 더 �
 3. **Paper Write-up**: LaTeX로 학회 형식의 논문을 자동 작성
 4. **Automated Review**: LLM 리뷰어가 논문을 평가하고 피드백 제공
 
-이 시스템은 논문 한 편을 약 $15에 생성하며, ML 학회에서 "Weak Accept" 수준의 평가를 받았다.
+이 시스템은 논문 한 편을 약 $15에 생성하며, ML 학회 기준으로 "Weak Accept" 수준의 평가(자동 리뷰어 기준)를 받았다. 이후 후속 버전인 AI Scientist-v2가 작성한 논문은 ICLR 2025 워크숍의 블라인드 동료 평가를 통과했고(주최 측과 사전 합의하여 게재 전에 철회), 이 시스템에 관한 논문은 2026년 3월 *Nature*에 게재되었다.
 
 그러나 중요한 한계도 있다:
 - 시각화 결과를 스스로 읽지 못해 그래프 오류를 수정하지 못함
@@ -69,12 +69,12 @@ Generative Agents 논문이 보여준 핵심 통찰은, **에이전트란 곧 �
 
 Claude Code는 이 원리를 두 가지 메모리 시스템으로 구현하고 있다:
 
-| | 장기기억 (CLAUDE.md) | 단기기억 (자동 메모리) |
+| | 장기기억 (CLAUDE.md) | 경험 기억 (자동 메모리, MEMORY.md) |
 |---|---|---|
-| **비유** | 연구 노트, 프로토콜 | 실험 중 메모 |
+| **비유** | 연구 노트, 프로토콜 | 경험에서 얻은 메모 |
 | **작성자** | 사용자 (+ AI 자동 업데이트 가능) | Claude가 자동으로 기록 |
-| **포함 내용** | 연구 맥락, 분석 규칙, 가설 | 빌드 명령, 디버깅 인사이트, 선호도 |
-| **지속성** | 사용자가 삭제할 때까지 영구 | 세션 간 자동 유지 |
+| **포함 내용** | 연구 맥락, 분석 규칙, 가설 | 사용자 선호, 사용자가 바로잡아 준 내용, 코드로 알 수 없는 프로젝트 맥락 |
+| **지속성** | 사용자가 삭제할 때까지 영구 | 세션 간 자동 유지 (`~/.claude/projects/<프로젝트>/memory/`) |
 
 ### CLAUDE.md
 
@@ -104,7 +104,7 @@ Claude Code는 이 원리를 두 가지 메모리 시스템으로 구현하고 �
 이 세포들이 특정 공간 패턴을 보일 것이다.
 ```
 
-CLAUDE.md에 정보를 많이 넣을수록 Claude는 더 정확한 분석 코드를 작성하고, 더 적절한 과학적 해석을 내놓는다. Generative Agents에서 에이전트의 기억이 풍부할수록 더 적절한 행동을 하는 것과 같은 원리로 볼 수 있다.
+연구의 배경과 가설처럼 데이터나 코드만 봐서는 알 수 없는 맥락을 CLAUDE.md에 적어 두면, Claude는 더 적절한 분석 코드와 과학적 해석을 내놓는다. Generative Agents에서 에이전트가 기억을 바탕으로 행동을 정하는 것과 같은 원리로 볼 수 있다. 다만 CLAUDE.md는 대화마다 통째로 읽히므로 짧고 핵심적으로 유지하는 것이 좋다. 공식 문서도 코드에서 알아낼 수 있는 내용은 빼고 간결하게 쓰라고 권한다.
 
 CLAUDE.md 파일은 여러 위치에 둘 수 있으며, 각각 적용 범위가 다르다:
 
@@ -124,7 +124,7 @@ CLAUDE.md 파일은 여러 위치에 둘 수 있으며, 각각 적용 범위가 
 
 > CLAUDE.md의 핵심 가설 섹션을 업데이트해줘. 기존 가설에 추가로 "Treg 세포가 종양 경계 영역에 집중 분포"를 새로운 발견으로 추가해줘.
 
-**2. `.claude/rules/`로 규칙 자동 분리**: 지침이 많아지면 주제별 파일로 분리하여, 필요한 상황에서만 자동으로 로드되게 한다.
+**2. `.claude/rules/`로 규칙 자동 분리**: 지침이 많아지면 주제별 파일로 분리한다. `.claude/rules/`의 규칙 파일은 기본적으로 세션을 시작할 때 CLAUDE.md와 함께 로드되며, 아래처럼 `paths`를 지정한 규칙만 필요한 상황에서 자동으로 로드된다.
 
 ```text
 my-research-project/
@@ -155,9 +155,11 @@ paths:
 
 ### 자동 메모리
 
-Claude Code는 **단기기억을 자동으로 유지**한다. 별도의 설정 없이(기본값: 켜짐), Claude가 작업하면서 발견한 패턴, 실패한 시도, 성공한 해결책 등을 스스로 기록하고 다음 세션에 자동으로 불러온다.
+Claude Code는 **경험 기억을 자동으로 유지**한다(자동 메모리). 별도의 설정 없이(기본값: 켜짐), Claude가 작업하면서 다음 대화에도 쓸모 있다고 판단한 내용을 스스로 기록하고 다음 세션에 자동으로 불러온다. 주로 기록하는 것은 사용자의 역할과 선호, 사용자가 바로잡아 준 내용, 코드나 Git 기록만 봐서는 알 수 없는 프로젝트 맥락(진행 중인 작업, 결정 사항 등), 외부 자료의 위치다. 반대로 코드에서 직접 알아낼 수 있는 내용(디렉토리 구조, 파일 경로 등)이나 CLAUDE.md에 이미 적힌 내용은 기록하지 않는다.
 
-예를 들어, 한 세션에서 "이 프로젝트는 `micromamba`로 환경을 관리한다"는 사실을 학습하면, 다음 세션에서는 별도의 지시 없이도 `conda` 대신 `micromamba` 명령을 사용한다. 디버깅 중 발견한 트러블슈팅 방법, 빌드 명령, 코드 스타일 선호도 등도 마찬가지다.
+예를 들어, 한 세션에서 "conda 말고 `micromamba`를 써"라고 바로잡아 주면, 다음 세션에서는 별도의 지시 없이도 `conda` 대신 `micromamba` 명령을 사용한다.
+
+자동 메모리는 프로젝트 폴더가 아니라 `~/.claude/projects/<프로젝트>/memory/`에 저장되므로 Git으로 팀과 공유되지 않는다. 이 폴더의 `MEMORY.md`가 목차 역할을 하며, 세션을 시작할 때 앞부분(최대 200줄 또는 25KB)만 로드되고 자세한 내용은 별도 주제 파일에 나뉘어 필요할 때 읽힌다. `/memory` 명령으로 메모리 파일을 열어 직접 고치거나, 자동 메모리를 켜고 끌 수 있다.
 
 이것이 에이전트와 단순 챗봇의 차이다. **챗봇은 매 세션 같은 실수를 반복하지만, 에이전트는 경험에서 배울 수 있다.**
 
@@ -165,9 +167,11 @@ Claude Code는 **단기기억을 자동으로 유지**한다. 별도의 설정 �
 
 11장에서 기존 MCP 서버를 설치하는 방법을 배웠다. 하지만 연구 분야에 따라 **필요한 API가 기존 MCP 서버에 없는 경우**가 많다. 이때 MCP 서버를 직접 만들어 Claude Code에 연결할 수 있다.
 
-### Python FastMCP
+### Python MCP SDK (MCPServer)
 
-Python의 `mcp` 패키지를 사용하면 간단하게 MCP 서버를 만들 수 있다. FastMCP는 Flask나 FastAPI처럼 데코레이터 패턴을 사용하므로, Python에 익숙한 연구자라면 쉽게 이해할 수 있다.
+Python의 공식 `mcp` 패키지를 사용하면 간단하게 MCP 서버를 만들 수 있다. 이 패키지의 `MCPServer` 클래스는 Flask나 FastAPI처럼 데코레이터 패턴을 사용하므로, Python에 익숙한 연구자라면 쉽게 이해할 수 있다.
+
+> **주의**: `mcp` 패키지 1.x에서는 이 클래스의 이름이 `FastMCP`였고, 2.0부터 `MCPServer`로 바뀌었다. 인터넷의 예제나 AI가 생성한 코드에 `from mcp.server.fastmcp import FastMCP`가 보이면 최신 패키지에서는 `ModuleNotFoundError`가 나므로, `from mcp.server.mcpserver import MCPServer`로 바꿔야 한다. 이런 변화에 대비해 패키지 버전을 `mcp>=2,<3`처럼 고정해 두는 것이 좋다.
 
 ### Claude Code로 MCP 서버 만들기
 
@@ -177,13 +181,13 @@ MCP 서버를 처음부터 직접 작성할 필요는 없다. 어떤 API를 사�
 
 KEGG(Kyoto Encyclopedia of Genes and Genomes)는 유전자와 대사 경로 정보를 제공하는 데이터베이스이다. 유전자가 어떤 생물학적 경로에 관여하는지 조회할 때 필수적으로 사용된다.
 
-> KEGG REST API를 사용하는 MCP 서버를 만들어줘. Python mcp 패키지의 FastMCP를 사용해줘. 다음 기능이 필요해: pathway 키워드 검색 (예: "apoptosis"), 특정 pathway에 포함된 유전자 목록 조회, 유전자가 속한 pathway 조회. docstring을 자세하게 작성해줘.
+> KEGG REST API를 사용하는 MCP 서버를 kegg_mcp.py로 만들어줘. Python mcp 패키지 2.x(`mcp>=2,<3`)의 MCPServer(`from mcp.server.mcpserver import MCPServer`)를 사용해줘. 다음 기능이 필요해: pathway 키워드 검색 (예: "apoptosis"), 특정 pathway에 포함된 유전자 목록 조회, 유전자가 속한 pathway 조회. docstring을 자세하게 작성해줘.
 
 Claude Code가 생성한 코드에서 이해해야 할 핵심 포인트:
 
 - `@mcp.tool()`: 함수를 Claude가 호출할 수 있는 도구로 등록하는 데코레이터
 - **docstring이 중요하다**: Claude는 docstring을 읽고 어떤 도구를 언제 사용할지 판단한다. "KEGG에서 pathway를 검색합니다"라는 설명이 있으므로, 사용자가 "apoptosis 관련 경로를 찾아줘"라고 하면 Claude가 이 도구를 호출한다
-- `mcp.run()`: Claude Code가 stdin/stdout으로 통신하는 표준 방식
+- `mcp.run(transport="stdio")`: Claude Code와 stdin/stdout으로 통신하는 표준 방식으로 서버를 실행
 
 **다른 API로 MCP 서버 만들기:**
 
@@ -197,20 +201,30 @@ Claude Code가 생성한 코드에서 이해해야 할 핵심 포인트:
 
 MCP 서버를 만들었으면 Claude Code에 등록해야 한다. 이것도 Claude Code에게 요청할 수 있다:
 
-> 방금 만든 kegg_mcp.py를 Claude Code의 MCP 서버로 등록해줘.
+> 방금 만든 kegg_mcp.py를 project scope로 Claude Code의 MCP 서버로 등록해줘.
 
-Claude Code가 `.claude/settings.json`에 다음과 같은 설정을 추가해 준다:
+Claude Code가 다음과 같은 명령을 실행한다:
+
+```bash
+claude mcp add --scope project kegg -- uv run --with "mcp>=2,<3" kegg_mcp.py
+```
+
+`--` 뒤의 내용은 서버를 실행하는 명령으로 그대로 전달된다. `uv run --with "mcp>=2,<3"`은 고정한 버전의 `mcp` 패키지를 갖춘 환경에서 스크립트를 실행한다. project scope로 등록하면 프로젝트 루트의 `.mcp.json`에 다음과 같은 설정이 기록되어, Git으로 팀원과 공유할 수 있다:
 
 ```json
 {
   "mcpServers": {
     "kegg": {
+      "type": "stdio",
       "command": "uv",
-      "args": ["run", "kegg_mcp.py"]
+      "args": ["run", "--with", "mcp>=2,<3", "kegg_mcp.py"],
+      "env": {}
     }
   }
 }
 ```
+
+MCP 서버 설정은 `.claude/settings.json`이 아니라 범위에 따라 `.mcp.json`(project) 또는 `~/.claude.json`(local, user)에 저장된다(11.3 참고). `.mcp.json`에 새로 등록된 서버는 그 프로젝트에서 Claude Code를 대화형으로 실행할 때 사용 승인을 묻는다.
 
 ## 12.5 커스텀 에이전트 정의
 
@@ -218,22 +232,36 @@ Claude Code는 `.claude/agents/` 디렉토리에 커스텀 에이전트를 정�
 
 ### Claude Code로 에이전트 만들기
 
-> .claude/agents/ 폴더에 literature-reviewer 에이전트를 만들어줘. 역할: 생명정보학 문헌 검색 전문가. bioRxiv, PubMed, fetch MCP 서버를 사용할 수 있어. 검색 결과를 제목, 저자, 주요 발견, 관련성으로 정리하는 표를 출력해야 해.
+> .claude/agents/ 폴더에 literature-reviewer 에이전트를 만들어줘. 역할: 생명정보학 문헌 검색 전문가. PubMed MCP 서버와 Claude Code 내장 웹 검색(WebSearch, WebFetch)을 사용할 수 있어. 검색 결과를 제목, 저자, 주요 발견, 관련성으로 정리하는 표를 출력해야 해.
 
 > .claude/agents/ 폴더에 data-analyst 에이전트를 만들어줘. 역할: 단일세포 유전체학 전문 데이터 분석가. Scanpy/AnnData로 분석하고, 300 dpi 퀄리티로 figure를 생성해. CLAUDE.md에 정의된 분석 파이프라인을 항상 따르게 해줘.
 
-Claude Code가 생성하는 에이전트 파일은 마크다운 형식이다. 역할(Role), 사용 가능한 도구(Tools), 출력 형식(Output Format) 등을 명시하면 해당 에이전트가 그 지침을 따르게 된다.
+Claude Code가 생성하는 에이전트 파일은 맨 위에 YAML 머리말(frontmatter)이 있는 마크다운 파일이다. 예를 들어 `.claude/agents/literature-reviewer.md`는 다음과 같은 모양이 된다:
+
+```markdown
+---
+name: literature-reviewer
+description: 생명정보학 문헌 검색 전문가. 논문 검색과 연구 동향 분석이 필요할 때 사용한다.
+tools: Read, Write, WebSearch, WebFetch, mcp__pubmed__search_articles, mcp__pubmed__get_article_metadata
+model: sonnet
+---
+
+너는 생명정보학 문헌 검색 전문가다. PubMed MCP로 논문을 검색하고,
+결과를 제목, 저자, 주요 발견, 관련성 열을 가진 마크다운 표로 정리한다.
+```
+
+머리말의 `name`(에이전트 이름)과 `description`(언제 이 에이전트를 쓸지)은 필수다. `tools`는 사용할 수 있는 도구 목록으로, 생략하면 사용 가능한 도구를 모두 물려받는다. MCP 도구는 `mcp__<서버 이름>__<도구 이름>` 형식으로 적는다. `model`로 사용할 모델을 지정할 수 있다. 머리말 아래의 본문은 에이전트의 시스템 프롬프트가 되므로, 여기에 역할, 작업 절차, 출력 형식을 적으면 해당 에이전트가 그 지침을 따르게 된다.
 
 ### 연구 역할별 에이전트 구성
 
-| 에이전트 | 역할 | 사용하는 MCP |
+| 에이전트 | 역할 | 사용하는 MCP/도구 |
 |---------|------|------------|
-| **Literature Reviewer** | 문헌 검색, 동향 분석 | bioRxiv, PubMed, fetch |
+| **Literature Reviewer** | 문헌 검색, 동향 분석 | PubMed MCP, 내장 웹 검색 |
 | **Data Analyst** | 데이터 분석, 시각화 | (Python 직접 실행) |
 | **Pathway Analyst** | 경로 분석, GO enrichment | KEGG MCP, GO MCP |
-| **Protocol Writer** | 실험 프로토콜 초안 | fetch |
+| **Protocol Writer** | 실험 프로토콜 초안 | 내장 웹 검색 |
 
-정의한 에이전트는 Claude Code에서 `@에이전트이름`으로 호출한다. 예를 들어 `@literature-reviewer`라고 입력하면 해당 에이전트의 역할과 지침이 활성화된다.
+정의한 에이전트는 `@agent-에이전트이름`으로 호출한다. 프롬프트 입력창에 `@`를 입력하면 나타나는 목록에서 에이전트를 골라도 된다. 예를 들어 `@agent-literature-reviewer`라고 입력하면 해당 에이전트에게 작업이 맡겨진다. "literature-reviewer 에이전트로 이 주제의 논문을 찾아줘"처럼 자연어로 요청해도 된다.
 
 이 구조는 Generative Agents의 멀티에이전트 시스템과 비슷한 면이 있다. 각 에이전트가 **자신의 전문 영역에서 관찰(Observation)하고, 계획(Planning)하고, 되돌아보며 통찰(Reflection)을 도출**한다. 연구자는 이 에이전트들의 결과를 종합하여 최종 판단을 내린다.
 
@@ -251,11 +279,14 @@ Hooks는 `.claude/settings.json`에 정의한다. 각 Hook은 **이벤트**(언�
 
 ### Hook 이벤트
 
+Hook 이벤트는 30여 가지가 있다. 다음은 주요 이벤트 일부다:
+
 | 이벤트 | 실행 시점 | 활용 예시 |
 |--------|----------|----------|
 | **PreToolUse** | 도구 실행 직전 | 위험한 명령 차단, 권한 확인 |
 | **PostToolUse** | 도구 실행 직후 | 린터 실행, 로그 기록 |
 | **Stop** | Claude가 응답을 마칠 때 | 결과 검증, 테스트 자동 실행 |
+| **SubagentStop** | 서브에이전트가 작업을 마칠 때 | 에이전트별 결과 기록, 알림 |
 | **SessionStart** | 세션 시작 시 | 환경 점검, 컨텍스트 주입 |
 | **Notification** | 알림 발생 시 | Slack/Discord 알림 전송 |
 
@@ -273,7 +304,7 @@ Hook의 핵심은 **결정론적(deterministic) 제어**에 있다. LLM이 "알�
 
 ## 12.7 Skills로 전문 능력 부여하기
 
-**Skills**는 Claude Code에게 **새로운 전문 능력을 가르치는 방법**이다. `.claude/skills/` 디렉토리에 마크다운 파일을 만들면, 사용자가 `/skill-name` 명령으로 호출하거나 Claude가 상황에 맞게 자동으로 활성화한다.
+**Skills**는 Claude Code에게 **새로운 전문 능력을 가르치는 방법**이다. 스킬 하나는 하나의 폴더이며, `.claude/skills/<스킬 이름>/SKILL.md` 파일에 절차를 적는다. 이렇게 만들어 두면 사용자가 `/스킬 이름` 명령으로 호출하거나 Claude가 상황에 맞게 자동으로 활성화한다. 예전의 커스텀 슬래시 명령(`.claude/commands/`)도 지금은 스킬로 통합되었다.
 
 커스텀 에이전트가 "역할이 다른 팀원"이고, Hooks가 "자동 규칙"이라면, Skills는 **팀원에게 가르치는 전문 매뉴얼**이다. "문헌 검색을 할 때는 이 절차를 따라라"는 매뉴얼을 한 번 만들어두면, 이후에는 `/literature-search`만 입력하면 된다.
 
@@ -281,11 +312,11 @@ Hook의 핵심은 **결정론적(deterministic) 제어**에 있다. LLM이 "알�
 
 Skill 파일도 Claude Code에게 생성을 요청한다:
 
-> .claude/skills/ 폴더에 literature-search 스킬을 만들어줘. bioRxiv MCP 서버로 프리프린트를 검색하고, 상위 5편의 논문을 제목/저자/주요 발견/관련성으로 정리하는 절차야. 결과는 마크다운 표로 출력해줘.
+> .claude/skills/literature-search/SKILL.md로 literature-search 스킬을 만들어줘. 명령어 뒤에 붙인 검색 주제를 받아 PubMed MCP 서버로 논문을 검색하고, 상위 5편의 논문을 제목/저자/주요 발견/관련성으로 정리하는 절차야. 결과는 마크다운 표로 출력해줘.
 
-> .claude/skills/ 폴더에 analysis-report 스킬을 만들어줘. 현재 프로젝트의 분석 결과 파일(h5ad, csv)을 확인하고, 핵심 발견 요약, 사용 방법, 주요 결과, 추가 분석 항목을 마크다운 리포트로 생성하는 절차야.
+> .claude/skills/analysis-report/SKILL.md로 analysis-report 스킬을 만들어줘. 현재 프로젝트의 분석 결과 파일(h5ad, csv)을 확인하고, 핵심 발견 요약, 사용 방법, 주요 결과, 추가 분석 항목을 마크다운 리포트로 생성하는 절차야.
 
-생성된 Skill은 `/literature-search pancreatic cancer immunotherapy`처럼 명령어와 인자를 함께 전달하여 사용한다.
+생성된 Skill은 `/literature-search pancreatic cancer immunotherapy`처럼 명령어와 인자를 함께 전달하여 사용한다. 명령어 뒤의 인자는 SKILL.md 안의 `$ARGUMENTS` 자리에 들어간다.
 
 ## 12.8 멀티에이전트 워크플로우
 
@@ -295,11 +326,11 @@ Skill 파일도 Claude Code에게 생성을 요청한다:
 
 여러 에이전트를 순차적으로 활용하는 연구 워크플로우:
 
-> @literature-reviewer 최근 6개월간 pancreatic cancer의 새로운 치료 표적에 관한 bioRxiv 프리프린트를 검색하고, 가장 유망한 표적 유전자 3개를 선정해줘.
+> @agent-literature-reviewer 최근 6개월간 pancreatic cancer의 새로운 치료 표적에 관한 PubMed 논문을 검색하고, 가장 유망한 표적 유전자 3개를 선정해줘.
 
-> @data-analyst Literature Reviewer가 선정한 3개 유전자에 대해, TCGA pancreatic cancer 데이터에서 정상 대비 암 조직의 발현 차이를 분석하는 코드를 작성해줘.
+> @agent-data-analyst Literature Reviewer가 선정한 3개 유전자에 대해, TCGA pancreatic cancer 데이터에서 정상 대비 암 조직의 발현 차이를 분석하는 코드를 작성해줘.
 
-> @pathway-analyst 위 유전자들이 포함된 KEGG pathway를 조회하고, GO enrichment 분석을 수행해줘.
+> @agent-pathway-analyst 위 유전자들이 포함된 KEGG pathway를 조회하고, GO enrichment 분석을 수행해줘.
 
 > 세 분석 결과를 종합하여 어떤 유전자가 가장 유망한 표적인지 근거와 함께 정리해줘.
 
@@ -307,7 +338,7 @@ Skill 파일도 Claude Code에게 생성을 요청한다:
 
 ### 단일세포 분석 워크플로우
 
-> 1. bioRxiv에서 NSCLC tumor microenvironment 관련 단일세포 분석 최신 논문을 검색해줘. 2. 각 논문의 분석 방법과 세포 유형 분류 기준을 정리해줘. 3. 이 정보를 바탕으로 우리 데이터에 적용할 T세포 하위 클러스터 분석 Scanpy 코드를 작성해줘. CD4/CD8 구분, exhaustion marker 확인을 포함해줘. 4. 분석 결과의 생물학적 의미를 해석해줘.
+> 1. PubMed에서 NSCLC tumor microenvironment 관련 단일세포 분석 최신 논문을 검색해줘. 2. 각 논문의 분석 방법과 세포 유형 분류 기준을 정리해줘. 3. 이 정보를 바탕으로 우리 데이터에 적용할 T세포 하위 클러스터 분석 Scanpy 코드를 작성해줘. CD4/CD8 구분, exhaustion marker 확인을 포함해줘. 4. 분석 결과의 생물학적 의미를 해석해줘.
 
 이 워크플로우는 Observation(1-2) → Planning(3) → Reflection(4)의 구조와 닮아 있다. 문헌을 관찰하고, 분석 계획을 세우고, 결과를 해석하는 과정이다.
 
@@ -332,7 +363,7 @@ Skill 파일도 Claude Code에게 생성을 요청한다:
 - **Generative Agents 아키텍처**: Observation → Planning → Reflection 구조를 연구 워크플로우에 적용
 - **The AI Scientist**: 완전 자동화 연구의 가능성과 한계를 보여줌. Human-in-the-Loop의 중요성 확인
 - **CLAUDE.md**: 연구 맥락을 제공하는 에이전트의 기억(memory) 역할. 정보가 풍부할수록 AI가 더 정확하게 동작
-- **나만의 MCP 서버**: FastMCP로 KEGG, Ensembl 등 생명정보학 API를 Claude Code에 연결
+- **나만의 MCP 서버**: Python MCP SDK 2.x의 `MCPServer`로 KEGG, Ensembl 등 생명정보학 API를 Claude Code에 연결
 - **커스텀 에이전트**: `.claude/agents/`에 역할별 에이전트를 정의하여 전문화된 분석 수행
 - **Hooks**: 파일 저장, 세션 시작 등 특정 시점에 자동 실행되는 규칙으로 품질 관리 자동화
 - **Skills**: 반복적인 연구 작업을 표준화된 절차로 정의하여 `/명령어`로 호출

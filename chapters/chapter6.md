@@ -27,7 +27,7 @@
 
 | 도구 | 언어 | 특징 |
 |------|------|------|
-| **Snakemake** | Python | 생명정보학에서 가장 널리 사용, Conda 통합 |
+| **Snakemake** | Python | 생명정보학에서 널리 사용, Conda 통합 |
 | **Nextflow** | Groovy/DSL | 클라우드 환경에 강점, nf-core 생태계 |
 | **WDL** | 자체 DSL | Broad Institute 개발, Terra 플랫폼 연동 |
 | **CWL** | YAML/JSON | 표준 규격, 이식성 높음 |
@@ -88,7 +88,9 @@ DAG의 "비순환(Acyclic)"은 의존 관계가 원형으로 돌지 않는다는
 
 생명정보학 파이프라인에서는 서로 다른 도구가 서로 다른 의존성을 요구하는 경우가 많다. STAR는 C++ 라이브러리가 필요하고, DESeq2는 R과 Bioconductor가 필요하다. 이 두 환경을 하나의 Conda 환경에 넣으면 충돌이 발생할 수 있다.
 
-Snakemake는 각 rule에 독립적인 Conda 환경을 지정할 수 있다. `--use-conda` 플래그를 붙여 실행하면, Snakemake가 각 rule에 지정된 YAML 파일을 읽어 자동으로 Conda 환경을 생성하고 활성화한다. 환경 정의가 코드와 함께 버전 관리되므로, 1년 후에 파이프라인을 다시 실행해도 동일한 버전의 도구가 설치된다.
+Snakemake는 각 rule에 독립적인 Conda 환경을 지정할 수 있다. `--sdm conda`(`--software-deployment-method conda`의 줄임말) 옵션을 붙여 실행하면, Snakemake가 각 rule에 지정된 YAML 파일을 읽어 자동으로 Conda 환경을 생성하고 활성화한다. 예전 문서나 예제에서 보이는 `--use-conda`는 같은 기능의 이전 형식이다.
+
+환경 정의가 코드와 함께 버전 관리되므로 재현성이 높아지지만, 이는 YAML 파일에 도구 버전을 고정했을 때의 이야기이다. `star=2.7.11b`처럼 버전을 적어 두지 않으면, 1년 후에 다시 실행할 때는 그 시점의 최신 버전이 설치된다. 더 엄격하게 재현하려면 환경 파일 옆에 Snakemake가 지원하는 고정 파일(예: `envs/star.yaml` 옆의 `envs/star.linux-64.pin.txt`)을 함께 두면 된다.
 
 ### Config 파일
 
@@ -118,7 +120,7 @@ Snakemake의 문법을 완벽하게 익히는 것보다, **분석 파이프라�
 
 ### Conda 환경 분리 요청
 
-> "각 rule에 독립적인 Conda 환경을 설정해줘. STAR와 featureCounts는 같은 환경을 쓰고, DESeq2는 R 환경을 별도로 만들어줘. envs/ 폴더에 YAML 파일을 생성해줘."
+> "각 rule에 독립적인 Conda 환경을 설정해줘. STAR와 featureCounts는 같은 환경을 쓰고, DESeq2는 R 환경을 별도로 만들어줘. envs/ 폴더에 YAML 파일을 생성하고, 각 도구의 버전은 고정해줘."
 
 ### Config 파일 분리
 
@@ -138,7 +140,9 @@ Snakemake를 실행할 때는 항상 드라이런(`-n`)으로 먼저 계획을 �
 
 > "Snakemake 드라이런을 실행해서 결과를 보여줘."
 
-> "Snakemake를 4코어로 실행해줘."
+> "Snakemake를 4코어로, rule별 Conda 환경을 사용해서 실행해줘."
+
+이 요청이면 Claude Code는 `snakemake --cores 4 --sdm conda`와 같은 명령을 실행한다.
 
 > "DAG 그래프를 생성해줘."
 

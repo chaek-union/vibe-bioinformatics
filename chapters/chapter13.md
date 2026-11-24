@@ -41,11 +41,11 @@ AI를 활용한 학술 논문 작성은 이미 널리 퍼지고 있다. 특히 �
 
 **연구자가 직접** 인용할 논문을 선택한다. AI가 논문을 추천하는 것이 아니라, 연구자가 읽고 판단한 논문만 참조 목록에 포함한다. 이렇게 하면 **허위 인용(fabricated citations)** 문제를 원천적으로 방지할 수 있다.
 
-12장에서 구축한 Co-scientist의 Literature Reviewer 에이전트가 이 단계를 보조할 수 있다. MCP를 통해 bioRxiv나 PubMed에서 관련 논문을 검색하고, 초록을 요약해 주므로 후보 논문을 빠르게 파악할 수 있다. 단, 최종 선별은 연구자의 몫이다. AI가 "이 논문이 관련 있다"고 제안하더라도, 실제로 읽고 내용을 확인한 논문만 인용해야 한다.
+12장에서 구축한 Co-scientist의 Literature Reviewer 에이전트가 이 단계를 보조할 수 있다. PubMed MCP와 내장 웹 검색으로 관련 논문을 검색하고, 초록을 요약해 주므로 후보 논문을 빠르게 파악할 수 있다. 단, 최종 선별은 연구자의 몫이다. AI가 "이 논문이 관련 있다"고 제안하더라도, 실제로 읽고 내용을 확인한 논문만 인용해야 한다.
 
 #### 3단계. 관점 정의
 
-연구의 핵심 관점과 주장을 **모국어로** 작성한다. AI가 이를 다듬어주지만, 핵심 아이디어는 반드시 연구자가 제공해야 한다. 이 단계가 가장 중요하다고 볼 수 있는데 — **연구자의 과학적 사고가 논문의 뼈대를 결정**하기 때문이다.
+연구의 핵심 관점과 주장을 **모국어로** 작성한다. AI가 이를 다듬어주지만, 핵심 아이디어는 반드시 연구자가 제공해야 한다. 이 단계가 가장 중요하다고 볼 수 있는데, **연구자의 과학적 사고가 논문의 뼈대를 결정**하기 때문이다.
 
 예를 들어 한국어로 이렇게 작성할 수 있다:
 
@@ -74,7 +74,7 @@ RAG는 AI가 자체 학습 데이터 대신 사용자가 제공한 문서에서 
 
 이 프레임워크를 구현한 오픈소스 웹 도구가 **Paper Writing Assistant**이다. 이 책에서 배운 SvelteKit + Tailwind CSS 기술 스택으로 개발되었다.
 
-- **웹 도구**: https://research.pnucolab.com
+- **웹 도구**: https://research.pnucolab.com/spwa
 - **소스 코드**: https://github.com/pnucolab/paper-writing-assistant
 
 ### 주요 특징
@@ -106,7 +106,7 @@ Paper Writing Assistant는 대안으로 **투명성 보고서(transparency repor
 
 ## 13.4 Paper Writing Assistant로 논문 작성하기
 
-13.3절에서 소개한 Paper Writing Assistant(https://research.pnucolab.com)를 사용하여 실제로 논문을 작성하는 과정을 살펴본다. 웹사이트에 접속하면 5단계 워크플로우를 순서대로 안내받을 수 있다.
+13.3절에서 소개한 Paper Writing Assistant(https://research.pnucolab.com/spwa)를 사용하여 실제로 논문을 작성하는 과정을 살펴본다. 웹사이트에 접속하면 5단계 워크플로우를 순서대로 안내받을 수 있다.
 
 ### 1단계: 형식 선택
 

@@ -8,11 +8,11 @@
 
 LLM은 **모델(Model)**과 **컨텍스트(Context)**로 이루어져 있다. 모델은 학습된 지식을 담은 신경망이고, 컨텍스트는 현재 대화의 내용을 담는 공간이다. 사용자의 질문, LLM의 답변, 코드, 분석 결과가 모두 컨텍스트에 쌓인다.
 
-![LLM의 구조 — 학습된 지식을 담은 모델과 현재 대화를 담는 컨텍스트로 이루어져 있다](../assets/ch11-00-model-and-context.png)
+![LLM의 구조: 학습된 지식을 담은 모델과 현재 대화를 담는 컨텍스트로 이루어져 있다](../assets/ch11-00-model-and-context.png)
 
 문제는 **컨텍스트의 크기에 한계가 있다**는 것이다. 대화가 길어지면 컨텍스트가 가득 차고, 오래된 내용부터 사라진다. ChatGPT, Claude, Gemini와 같은 LLM으로 긴 대화를 해본 사람이라면 알 것이다. 어느 순간 AI가 이전 대화를 기억하지 못하고 엉뚱한 방향으로 빠지기 시작한다. 컨텍스트가 한계에 도달한 것이다.
 
-![컨텍스트 오버플로 — 대화가 쌓이면 컨텍스트 한계를 넘은 이전 내용이 사라진다](../assets/ch11-00-context-overflow.png)
+![컨텍스트 오버플로: 대화가 쌓이면 컨텍스트 한계를 넘은 이전 내용이 사라진다](../assets/ch11-00-context-overflow.png)
 
 Claude Code와 같은 AI 기반 개발 도구는 수천 줄의 코드를 다뤄야 하므로 컨텍스트가 훨씬 빨리 찬다. 이를 완화하기 위해, 컨텍스트가 한계에 가까워지면 내용을 자동으로 요약하여 중요한 것들만 남긴다(compact 기능). 그러나 연구처럼 여러 종류의 작업이 혼재된 큰 주제에서는 이것만으로 부족하다. PubMed에서 논문을 검색하고, Scanpy로 발현 데이터를 분석하고, 경로 분석까지 하다 보면, 앞서 찾았던 논문의 핵심 내용이나 분석 맥락이 컨텍스트에서 밀려나 사라진다.
 
@@ -46,7 +46,7 @@ Claude Code와 같은 AI 기반 개발 도구는 수천 줄의 코드를 다뤄�
 
 이 개념은 하나의 시스템 안에만 머물지 않는다. 서로 다른 에이전틱 시스템이 협업해야 할 때도 있다. 예를 들어 한 연구실의 유전체 분석 시스템과 다른 연구실의 단백질 구조 예측 시스템이 데이터를 주고받아야 한다면, 두 시스템의 에이전트들이 서로를 발견하고 통신할 수 있어야 한다. 이를 위해 **A2A(Agent-to-Agent)**와 같은 에이전트 간 표준 프로토콜이 등장했다. 이 책에서 A2A를 직접 다루지는 않지만, 에이전틱 시스템이 단일 도구를 넘어 시스템 간 협업으로 확장되는 방향이라는 점은 알아둘 만하다.
 
-![에이전틱 시스템 — 연구자가 전문 에이전트들에게 작업을 위임하고, 시스템 간에는 A2A 프로토콜로 연결되는 구조](../assets/ch11-00-agentic-system.png)
+![에이전틱 시스템: 연구자가 전문 에이전트들에게 작업을 위임하고, 시스템 간에는 A2A 프로토콜로 연결되는 구조](../assets/ch11-00-agentic-system.png)
 
 ### 에이전트의 메모리
 
@@ -70,7 +70,7 @@ Claude Code는 이 구조를 **두 가지 파일**로 구현한다:
 
 **MEMORY.md**
 
-Claude Code가 **자동으로 관리**하는 파일이다. 대화 과정에서 학습한 내용을 Claude Code가 알아서 이 파일에 기록한다. 예를 들어 "이 데이터셋은 배치 효과가 크므로 Harmony 보정이 필요하다"는 사실을 발견하면 MEMORY.md에 기록하고, 다음 대화에서 같은 데이터를 분석할 때 이 메모리를 읽어 처음부터 Harmony 보정을 적용한다. 사용자가 별도로 관리할 필요 없이, Claude Code가 알아서 경험을 축적하고 행동을 개선한다.
+Claude Code가 **자동으로 관리**하는 파일이다(자동 메모리, auto memory). 대화 과정에서 Claude Code가 사용자의 선호, 사용자가 바로잡아 준 내용, 코드만 봐서는 알 수 없는 프로젝트 맥락을 스스로 기록한다. 예를 들어 "이 데이터셋은 배치 효과가 크므로 Harmony 보정이 필요하다"고 알려주면 이를 메모리에 남기고, 다음 대화에서 같은 데이터를 분석할 때 이 메모리를 읽어 처음부터 Harmony 보정을 적용한다. 이 파일은 프로젝트 폴더가 아니라 `~/.claude/projects/<프로젝트>/memory/MEMORY.md`에 저장되며, 새 대화를 시작할 때 앞부분(최대 200줄 또는 25KB)이 자동으로 불러와진다. 사용자가 별도로 관리할 필요는 없지만, `/memory` 명령으로 내용을 열어보거나 자동 메모리를 켜고 끌 수 있다(기본값: 켜짐).
 
 이처럼 경험에서 배우고 자신의 행동을 개선하는 것이 에이전트의 **자가 진화**다. CLAUDE.md가 사용자가 작성한 매뉴얼이라면, MEMORY.md는 에이전트가 현장에서 쌓은 노하우다.
 
@@ -119,7 +119,7 @@ Claude Code (MCP 클라이언트)
 
 MCP 서버는 Claude Code가 시작할 때 함께 실행되고, Claude가 필요할 때 호출한다. 사용자가 "PubMed에서 논문 찾아줘"라고 말하면, Claude는 PubMed MCP 서버를 통해 검색을 수행하고 결과를 사용자에게 보여준다.
 
-![MCP 개념도 — Claude Code가 여러 MCP 서버를 통해 외부 서비스에 접근하는 구조](../assets/ch11-01-mcp-concept.png)
+![MCP 개념도: Claude Code가 여러 MCP 서버를 통해 외부 서비스에 접근하는 구조](../assets/ch11-01-mcp-concept.png)
 
 ## 11.3 Claude Code에서 MCP 서버 설정하기
 
@@ -129,7 +129,7 @@ MCP 서버를 추가하는 가장 간단한 방법은 **Claude Code에게 자연
 
 > PubMed MCP 서버(https://pubmed.mcp.claude.com/mcp)를 전역으로 설치해줘
 
-이렇게 요청하면 Claude가 적절한 `claude mcp add` 명령을 찾아 실행한다. 설치가 끝나면 Claude Code를 재시작하라는 안내까지 함께 받을 수 있다.
+이렇게 요청하면 Claude가 적절한 `claude mcp add` 명령을 찾아 실행한다. 새로 등록한 서버는 그 이후에 시작하는 대화부터 사용할 수 있다.
 
 > **중요**: "전역으로"(또는 "user scope로", "모든 프로젝트에서 쓸 수 있게")를 **반드시 명시적으로** 알려줘야 한다. 그러지 않으면 Claude가 현재 프로젝트에만 설치하는 경우가 많아, 다른 프로젝트로 옮겼을 때 같은 MCP 서버를 다시 설치해야 한다. 생명정보학 MCP 서버처럼 여러 프로젝트에서 공통으로 쓸 서버는 항상 전역 설치를 지정하자.
 
@@ -141,10 +141,20 @@ MCP 서버를 추가하는 가장 간단한 방법은 **Claude Code에게 자연
 claude mcp add --transport http --scope user pubmed https://pubmed.mcp.claude.com/mcp
 ```
 
-- **`--scope user`**: 전역 설정에 추가한다. 모든 프로젝트에서 사용 가능. 프로젝트별로만 사용하려면 `--scope project`를 지정한다.
+- **`--scope user`**: 전역 설정에 추가한다. 모든 프로젝트에서 사용 가능하다.
 - **`--transport http`**: 원격 MCP 서버에 HTTP로 연결한다. PubMed MCP는 클라우드에서 운영되는 원격 서버이므로 별도 설치 없이 URL만 지정하면 된다.
 
-> **중요**: MCP 서버를 추가한 후에는 **Claude Code를 재시작해야 한다**. MCP 서버는 Claude Code가 시작할 때 함께 실행되므로, 새로 추가한 서버를 인식하려면 재시작이 필요하다.
+설치 범위(scope)는 세 가지다:
+
+| 범위 | 적용 대상 | 저장 위치 |
+|------|----------|----------|
+| `local` (기본값) | 현재 프로젝트, 나만 사용 | `~/.claude.json` |
+| `project` | 현재 프로젝트, 팀과 공유 (Git으로 공유) | 프로젝트 루트의 `.mcp.json` |
+| `user` | 모든 프로젝트, 나만 사용 | `~/.claude.json` |
+
+`--scope`를 생략하면 `local`로 설치되므로, 앞에서 "전역으로"를 명시하라고 한 것이다.
+
+> **중요**: MCP 서버를 추가한 후에는 **새 대화를 시작해야** 새로 추가한 서버가 인식된다. 새 대화에서 `/mcp`를 입력하면 서버 목록과 연결 상태를 확인할 수 있고, 서버가 **Connected**로 표시되지 않으면 같은 화면에서 다시 연결(Reconnect)할 수 있다.
 
 ### 설정 확인
 
@@ -154,6 +164,8 @@ claude mcp add --transport http --scope user pubmed https://pubmed.mcp.claude.co
 claude mcp list
 ```
 
+![claude mcp list로 확인한 MCP 서버 연결 상태](../assets/ch11-02-mcp-settings.png)
+
 ### 여러 MCP 서버 동시 사용
 
 MCP 서버는 여러 개를 동시에 등록할 수 있다. 생명정보학 연구를 위해 PubMed와 UniProt 서버를 함께 등록하면, Claude Code가 논문 검색부터 단백질 정보 조회까지 직접 수행할 수 있다. 자연어 요청도 한 번에 여러 서버를 묶어서 할 수 있다.
@@ -161,8 +173,6 @@ MCP 서버는 여러 개를 동시에 등록할 수 있다. 생명정보학 연�
 > PubMed MCP 서버와 UniProt MCP 서버를 전역으로 설치해줘
 
 > **참고**: MCP 설정에 대한 자세한 문서는 https://code.claude.com/docs/ko/mcp 에서 확인할 수 있다.
-
-![Claude Code 설정에서 MCP 서버를 추가하는 화면](../assets/ch11-02-mcp-settings.png)
 
 ## 11.4 MCP 마켓플레이스
 
@@ -178,7 +188,7 @@ MCP 서버는 여러 개를 동시에 등록할 수 있다. 생명정보학 연�
 
 그 외에도 [mcp.so](https://mcp.so/), [pulsemcp.com](https://www.pulsemcp.com/servers) 등 다양한 MCP 서버 디렉토리가 있다. "bioinformatics", "genomics", "protein" 등으로 검색하면 생명정보학 관련 MCP 서버를 찾을 수 있다.
 
-직접 해보자. https://mcpmarket.com/server/uniprot-1 에 접속하면 UniProt MCP 서버의 설치 방법과 제공하는 기능 목록을 확인할 수 있다. 페이지의 안내에 따라 Claude Code에 UniProt MCP 서버를 추가해 보자. 설치 후 Claude Code를 재시작하면, "TP53 단백질의 기능 도메인을 조회해줘" 같은 요청을 바로 처리할 수 있다.
+직접 해보자. https://mcpmarket.com/server/uniprot-1 에 접속하면 UniProt MCP 서버의 설치 방법과 제공하는 기능 목록을 확인할 수 있다. 페이지의 안내에 따라 Claude Code에 UniProt MCP 서버를 추가해 보자. 이 서버는 PubMed처럼 URL만 등록하는 원격 서버가 아니라, 저장소를 내려받아 Node.js로 빌드한 뒤 내 컴퓨터에서 실행하는 로컬(stdio) 서버다. 페이지 주소를 알려 주고 설치를 부탁하면 Claude Code가 내려받기와 빌드, 등록까지 진행해 준다. 설치 후 새 대화를 시작하면, "TP53 단백질의 기능 도메인을 조회해줘" 같은 요청을 바로 처리할 수 있다.
 
 MCP 생태계는 빠르게 성장하고 있다. 2024년 말 MCP가 공개된 이후 수천 개의 서버가 만들어졌으며, 생명정보학 분야도 예외가 아니다. 자주 사용하는 데이터베이스에 대한 MCP 서버가 아직 없다면, AI에게 "UniProt MCP 서버를 만들어줘"라고 요청하여 직접 만들 수도 있다.
 
@@ -196,7 +206,7 @@ UniProt 단백질 데이터베이스에서 직접 정보를 조회할 수 있다
 
 ### PubMed
 
-의생명 문헌 데이터베이스 PubMed를 검색할 수 있다. 3,600만 건 이상의 논문 메타데이터에 접근할 수 있다.
+의생명 문헌 데이터베이스 PubMed를 검색할 수 있다. 4,000만 건 이상의 논문 메타데이터에 접근할 수 있다.
 
 > CRISPR base editing 관련 최신 논문 10편 찾아줘. 이 논문들의 주요 발견을 비교 정리해줘
 
@@ -204,11 +214,11 @@ PubMed MCP 서버를 사용하면, Claude가 논문을 검색하고 초록을 �
 
 ## 11.6 Claude for Life Sciences
 
-Anthropic은 2025년 10월 **Claude for Life Sciences**를 발표하며 생명과학 분야에 특화된 기능을 제공하기 시작했다. 이는 생명과학이 AI 활용 가능성이 높은 분야라는 인식을 반영한 것이다.
+Anthropic은 2025년 10월 **Claude for Life Sciences**를 발표하며 생명과학 분야에 특화된 기능을 제공하기 시작했고, 2026년 1월에는 임상시험과 신약 개발 쪽 커넥터를 추가하며 범위를 넓혔다. 이는 생명과학이 AI 활용 가능성이 높은 분야라는 인식을 반영한 것이다.
 
 ### Scientific Connectors
 
-생명과학 분야의 주요 플랫폼과 연동할 수 있는 커넥터가 있다:
+생명과학 분야의 주요 플랫폼과 연동할 수 있는 커넥터가 있다(2026년 11월 기준):
 
 | 커넥터 | 용도 |
 |--------|------|
@@ -217,15 +227,24 @@ Anthropic은 2025년 10월 **Claude for Life Sciences**를 발표하며 생명�
 | **PubMed** | 의생명 문헌 검색 |
 | **10x Genomics** | 단일세포/공간 전사체 분석 |
 | **Synapse.org** | 협업 기반 데이터 분석 플랫폼 |
+| **Scholar Gateway (Wiley)** | 학술지 논문 접근 |
 | **ClinicalTrials.gov** | 임상시험 데이터 |
-| **ChEMBL** | 약물-표적 상호작용 데이터베이스 |
+| **Medidata** | 임상시험 운영 데이터 |
+| **ChEMBL** | 생리활성 화합물/약물 데이터베이스 |
+| **Open Targets** | 신약 표적 발굴과 우선순위 결정 |
 | **bioRxiv / medRxiv** | 프리프린트 서버 |
 
-이 커넥터들은 MCP 서버와 유사한 역할을 하지만, Anthropic이 공식적으로 관리하고 최적화한 것이라 안정성과 성능이 더 높을 수 있다.
+앞의 여섯 개는 2025년 10월 발표 때, ClinicalTrials.gov부터 bioRxiv / medRxiv까지는 2026년 1월에 추가되었다. 목록은 계속 늘어나므로 최신 목록은 공식 페이지(https://claude.com/solutions/life-sciences)에서 확인하자.
+
+이 커넥터들도 MCP를 기반으로 동작한다. 대부분 각 플랫폼이나 협력 기업이 만들어 운영하고, Anthropic이 검토하여 공식 커넥터 디렉토리(https://claude.ai/directory)에 등록한 것이다. 디렉토리에 있는 원격 커넥터는 11.3에서 배운 `claude mcp add` 명령으로 Claude Code에도 추가할 수 있다.
 
 ### Agent Skills
 
-Claude for Life Sciences에는 생명정보학 전용 **에이전트 스킬**도 포함되어 있다. 예를 들어 `single-cell-rna-qc` 스킬은 scverse 모범 사례에 따라 RNA 시퀀싱 데이터의 품질 관리와 필터링을 도와준다. 5장에서 배운 QC 과정을 Claude가 더 정확하게 수행할 수 있도록 전문 지식이 내장되어 있다.
+Claude for Life Sciences에는 생명정보학 전용 **에이전트 스킬**도 포함되어 있다. 예를 들어 `single-cell-rna-qc` 스킬은 scverse 모범 사례에 따라 RNA 시퀀싱 데이터의 품질 관리와 필터링을 도와준다. 5장에서 배운 QC 과정을 Claude가 더 정확하게 수행할 수 있도록 전문 지식이 내장되어 있다. 이 스킬은 현재 Anthropic의 `bio-research` 플러그인(https://github.com/anthropics/knowledge-work-plugins/tree/main/bio-research)에 들어 있으며, scvi-tools, Nextflow 파이프라인 스킬과 PubMed 등 생명과학 커넥터 설정이 함께 묶여 있다.
+
+### Claude Science
+
+2026년 6월에는 연구자용 작업 환경인 **Claude Science**가 베타로 공개되었다. macOS나 Linux 컴퓨터, 또는 SSH로 접속한 원격 서버나 HPC 로그인 노드에서 실행되며, 유전체학, 단일세포, 단백질체학, 구조생물학 등을 위한 60개 이상의 스킬과 커넥터가 미리 설정되어 있다. 별도의 검토 에이전트가 인용과 계산을 확인하고, 생성한 figure마다 그 figure를 만든 코드와 환경을 함께 남긴다. 이 책에서 Claude Code로 직접 구성하는 Co-scientist 환경을 미리 꾸려 놓은 제품이라고 볼 수 있다(https://www.anthropic.com/news/claude-science-ai-workbench).
 
 ### 주요 활용 분야
 
@@ -234,7 +253,7 @@ Claude for Life Sciences에는 생명정보학 전용 **에이전트 스킬**도
 - **생명정보학 분석**: 유전체 데이터 분석 코드 작성 및 결과 해석
 - **규제 문서**: 임상시험 관련 규제 문서 초안 작성
 
-> **참고**: Claude for Life Sciences의 일부 기능은 기업용(Enterprise) 플랜에서만 쓸 수 있다. 개인 사용자도 MCP 서버를 조합하면 비슷한 워크플로우를 구현할 수 있다. 이 책에서 다루는 MCP 설정 방법이 그 기반이 된다.
+> **참고**: Claude for Life Sciences의 커넥터와 스킬은 Pro 이상 유료 플랜(Pro, Max, Team, Enterprise)에서 쓸 수 있다. 무료 플랜이라도 MCP 서버를 조합하면 비슷한 워크플로우를 구현할 수 있다. 이 책에서 다루는 MCP 설정 방법이 그 기반이 된다.
 
 ## 11.7 MCP와 바이브 코딩
 
@@ -251,10 +270,10 @@ Claude가 논문을 검색하고, 분석하고, 그 결과를 코드에 반영�
 - **MCP(Model Context Protocol)**: Claude Code에 외부 도구와 데이터 소스를 연결하는 표준 프로토콜
   - 사람이 중간 다리 역할을 하지 않아도 Claude가 직접 데이터에 접근
 - **설정 방법**: 터미널에서 `claude mcp add` 명령으로 서버 등록
-  - `--scope user`(전역) 또는 `--scope project`(프로젝트별)로 범위 지정
-  - 추가 후 Claude Code 재시작 필요
+  - `--scope local`(기본값, 현재 프로젝트에서 나만), `--scope project`(`.mcp.json`으로 팀 공유), `--scope user`(전역)로 범위 지정
+  - 추가 후 새 대화를 시작하고 `/mcp`로 연결 상태 확인
 - **MCP 마켓플레이스**: mcpmarket.com 등에서 필요한 MCP 서버를 검색하고 설치
   - 생태계가 빠르게 성장 중
 - **생명정보학 MCP 서버**: PubMed, UniProt 등 주요 데이터베이스에 Claude가 직접 접근
-- **Claude for Life Sciences**: Scientific Connectors와 Agent Skills로 생명과학 연구 지원
+- **Claude for Life Sciences**: Scientific Connectors와 Agent Skills로 생명과학 연구 지원, 연구자용 작업 환경 Claude Science(베타)도 제공
 - **핵심**: MCP 서버를 조합하면 Claude Code를 **생명정보학 연구 도우미**로 확장할 수 있다. 12~13장에서는 이를 활용해 도메인 지식 조사까지 자동화한다
